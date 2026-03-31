@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataLand</title>
+
+  <!--
+    ============================================================
+    INDEX.HTML — Point d'entrée du projet
+    ============================================================
+    Ce fichier contient UNIQUEMENT la structure HTML.
+    Aucun style ni logique n'est écrit ici.
+
+    ORDRE DE CHARGEMENT :
+    1. CSS  → base.css (variables), atmosphere.css, phone.css
+    2. HTML → structure de la page
+    3. JS   → scenario.js (données), atmosphere.js, engine.js
+
+    Pourquoi JS en dernier ?
+    Le moteur a besoin que le HTML existe pour y injecter
+    du contenu. En le chargeant après le HTML, on est sûrs
+    que tous les éléments sont disponibles.
+    ============================================================
+  -->
+
+  <!-- ── Styles ─────────────────────────────────────────── -->
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="atmosphere.css">
+  <link rel="stylesheet" href="phone.css">
+
+</head>
+<body>
+
+  <!--
+    ============================================================
+    STRUCTURE DE LA PAGE
+    ============================================================
+  -->
+
+  <!-- Vignette : calque semi-transparent sur les bords
+       Géré par atmosphere.css selon le mood actif -->
+  <div class="vignette"></div>
+
+  <!-- Label du chapitre en haut de l'écran
+       Mis à jour par engine.js à chaque changement de scène -->
+  <div class="chapter-label" id="chapter-label">DataLand</div>
+
+
+  <!-- ── Scène principale ───────────────────────────────── -->
+  <div class="scene">
+
+    <!-- Couche des nuages (arrière-plan)
+         Les divs .cloud sont positionnés par atmosphere.css -->
+    <div class="clouds">
+      <div class="cloud ca-t"></div>
+      <div class="cloud ca-c"></div>
+      <div class="cloud cl-a"></div>
+      <div class="cloud cl-b"></div>
+      <div class="cloud cl-c"></div>
+      <div class="cloud cl-d"></div>
+      <div class="cloud cl-e"></div>
+      <div class="cloud cl-f"></div>
+      <div class="cloud cr-a"></div>
+      <div class="cloud cr-b"></div>
+      <div class="cloud cr-c"></div>
+      <div class="cloud cr-d"></div>
+      <div class="cloud cr-e"></div>
+      <div class="cloud cr-f"></div>
+      <div class="cloud ca-b"></div>
+    </div>
+
+
+    <!-- ── Enveloppe téléphone + bulles ─────────────────── -->
+    <div class="phone-wrap">
+
+      <!-- Bulle de pensée NARRATIVE (au-dessus du téléphone)
+           Contenu injecté par engine.js
+           Affichage progressif du texte pour simuler la continuité -->
+      <div class="thought-bubble left" id="thought-left"
+           style="animation-delay: 0.3s; animation-fill-mode: both;">
+        <!-- texte injecté par engine.js -->
+      </div>
+
+      <!-- Conteneur relatif : le téléphone et accessoires
+           par rapport à ce div, pas par rapport à la page -->
+      <div class="phone-container">
+
+
+        <!-- ── TÉLÉPHONE ──────────────────────────────── -->
+        <div class="phone">
+          <div class="phone-screen">
+
+            <!-- Barre de statut (heure, opérateur, batterie)
+                 Statique pour l'instant — peut être rendue
+                 dynamique plus tard avec l'heure réelle -->
+            <div class="status-bar">
+              <span id="status-time">9:41</span>
+              <span>DataLand ◈</span>
+              <span>▮▮▮ ◉</span>
+            </div>
+
+            <!-- Zone de contenu principal
+                 Tout ce que le joueur voit sur l'écran
+                 est injecté ici par engine.js -->
+            <div class="screen-content" id="screen-content">
+              <!-- Contenu injecté dynamiquement par engine.js -->
+            </div>
+
+            <!-- Barre home (trait en bas) -->
+            <div class="home-bar"></div>
+
+          </div><!-- /.phone-screen -->
+        </div><!-- /.phone -->
+
+      </div><!-- /.phone-container -->
+
+
+      <!-- ── Zone des choix ───────────────────────────── -->
+      <!-- Les boutons de choix sont injectés ici par engine.js
+           En mode démo, les boutons de mood sont aussi ici -->
+      <div class="choices-area" id="choices-area">
+        <!-- Boutons injectés dynamiquement par engine.js -->
+      </div>
+
+    </div><!-- /.phone-wrap -->
+
+  </div><!-- /.scene -->
+
+
+  <!--
+    ── Scripts (chargés en dernier, après le HTML) ──────────
+
+    ORDRE IMPORTANT :
+    1. scenario.js  → les données (SCENARIO)
+    2. atmosphere.js → le contrôleur de mood (Atmosphere)
+    3. engine.js    → le moteur qui utilise les deux (Engine)
+  -->
+  <script src="scenario.js"></script>
+  <script src="atmosphere.js"></script>
+  <script src="engine.js"></script>
+
+</body>
+</html>

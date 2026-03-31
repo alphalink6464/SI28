@@ -1,0 +1,472 @@
+/* ============================================================
+   PHONE.CSS — Téléphone, écran, éléments d'interface
+   ============================================================
+   Ce fichier gère tout ce qui concerne le téléphone :
+   - La coque physique du téléphone
+   - L'écran et son contenu (logo, texte, notifications)
+   - Les bulles de pensée et leurs petits points
+   - Les boutons de contrôle (démo des moods)
+
+   Les couleurs utilisées ici viennent de base.css via
+   les variables CSS (ex: var(--phone-body)).
+   ============================================================ */
+
+
+/* ============================================================
+   SECTION 1 — ENVELOPPE DU TÉLÉPHONE
+   Le .phone-wrap centre le téléphone et les bulles
+   dans la scène. Il contient :
+   - les bulles de pensée (à gauche et droite)
+   - le téléphone lui-même
+   - les boutons de contrôle en dessous
+   ============================================================ */
+.phone-wrap {
+  position: fixed;
+  z-index: 10; /* au-dessus des nuages */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  gap: 24px;
+}
+
+/* Conteneur relatif autour du téléphone seul
+   (nécessaire pour positionner les bulles par rapport au phone) */
+.phone-container {
+  position: relative;
+}
+
+
+/* ============================================================
+   SECTION 2 — CORPS DU TÉLÉPHONE
+   La coque extérieure noire avec ses reflets.
+   La taille s'adapte à la fenêtre (min() évite le débordement).
+   ============================================================ */
+.phone {
+  /* Taille responsive : format classique plus étroit */
+  width:  min(72vw, 400px);
+  height: min(95vh, 850px);
+
+  background:    var(--phone-body);
+  border-radius: clamp(40px, 7vw, 60px); /* arrondi adaptatif */
+  border:        1.5px solid var(--phone-border);
+
+  box-shadow:
+    0 0 0   7px rgba(0, 0, 0, 0.35),   /* liseré sombre autour */
+    0 0  80px rgba(0, 0, 0, 0.50),     /* ombre portée */
+    0 0 160px rgba(58, 139, 205, 0.04),/* halo bleu très subtil */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04); /* reflet interne */
+
+  position: relative;
+  overflow: hidden;
+
+  /* La boîte d'ombre change selon l'humeur — voir fin de fichier */
+  transition: box-shadow 3s ease;
+}
+
+/* — Dynamic island (encoche arrondie en haut) — */
+.phone::before {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 28px;
+  background: var(--phone-body);
+  border-radius: 22px;
+  z-index: 20;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* — Petite caméra frontale (point dans la Dynamic Island) — */
+.phone::after {
+  content: '';
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  transform: translateX(14px);
+  width: 9px;
+  height: 9px;
+  background: #12121a;
+  border-radius: 50%;
+  z-index: 21;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+
+/* ============================================================
+   SECTION 3 — ÉCRAN DU TÉLÉPHONE
+   La surface de l'écran (inset de 9px par rapport au corps).
+   ============================================================ */
+.phone-screen {
+  position: absolute;
+  inset: 9px; /* espace entre la coque et l'écran */
+  background: var(--phone-screen-bg);
+  /* L'arrondi de l'écran est légèrement inférieur à celui de la coque */
+  border-radius: calc(clamp(32px, 6vw, 52px) - 7px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* ------------------------------------------------------------
+   3.1 — Barre de statut (heure, opérateur, batterie)
+   ------------------------------------------------------------ */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 56px 22px 10px; /* 56px en haut pour laisser place à la Dynamic Island */
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-screen-secondary);
+  letter-spacing: 0.05em;
+}
+
+
+/* ------------------------------------------------------------
+   3.2 — Zone de contenu principal de l'écran
+   Occupe tout l'espace restant entre la barre de statut
+   et la barre home, et centre son contenu.
+   ------------------------------------------------------------ */
+.screen-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 18px;
+}
+
+
+/* ------------------------------------------------------------
+   3.3 — Logo DataLand (texte en haut de l'écran)
+   ------------------------------------------------------------ */
+.dl-logo {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  color: var(--dataland-blue);
+  text-transform: uppercase;
+  opacity: 0.65;
+  transition: color 3s ease; /* devient rouge en mode critique */
+}
+
+/* En mode critique, le logo passe au rouge */
+body.mood-critical .dl-logo {
+  color: #c82828;
+}
+
+
+/* ------------------------------------------------------------
+   3.4 — Texte de message sur l'écran
+   ------------------------------------------------------------ */
+.screen-message {
+  text-align: center;
+  color: var(--text-screen-primary);
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.75;
+  /* Apparaît avec un léger délai après le chargement */
+  opacity: 0;
+  animation: fadeIn 1.2s ease forwards 0.8s;
+}
+
+
+/* ------------------------------------------------------------
+   3.5 — Icône d'empreinte digitale (animation de démarrage)
+   ------------------------------------------------------------ */
+.fingerprint-ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 1px solid rgba(58, 139, 205, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  /* Apparaît après un délai */
+  opacity: 0;
+  animation: fadeIn 1s ease forwards 1.5s;
+}
+
+/* Deux cercles concentriques autour de l'icône */
+.fingerprint-ring::before {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 1px solid rgba(58, 139, 205, 0.11);
+}
+.fingerprint-ring::after {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  border: 1px solid rgba(58, 139, 205, 0.05);
+}
+
+.fp-svg {
+  width: 34px;
+  height: 34px;
+  opacity: 0.55;
+}
+
+
+/* ------------------------------------------------------------
+   3.6 — Notifications (popup sur l'écran)
+   ------------------------------------------------------------ */
+.notif {
+  background: rgba(255, 255, 255, 0.045);
+  border: 0.5px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  padding: 11px 15px;
+  width: 100%;
+  /* Apparaît après les autres éléments */
+  opacity: 0;
+  animation: fadeIn 0.5s ease forwards 2.2s;
+}
+
+.notif-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 5px;
+}
+
+/* Petit point coloré à gauche du nom de l'app */
+.notif-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dataland-blue);
+  flex-shrink: 0;
+}
+
+/* Nom de l'application (petit, en majuscules) */
+.notif-app {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--text-screen-muted);
+  text-transform: uppercase;
+}
+
+/* Corps du message de notification */
+.notif-text {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 300;
+  line-height: 1.55;
+}
+
+
+/* ------------------------------------------------------------
+   3.7 — Barre home (trait en bas de l'écran)
+   ------------------------------------------------------------ */
+.home-bar {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-bar::after {
+  content: '';
+  width: 100px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+
+/* ============================================================
+   SECTION 4 — BULLES DE PENSÉE (NARRATIVE - STYLE NUAGE)
+   Position fixe en haut, contour nuageux, taille stable.
+   ============================================================ */
+.thought-bubble {
+  position: fixed;
+  top: 80px;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  background: rgba(20, 20, 28, 0.95);  /* fond sombre, élément détaché */
+  border: 1.5px solid rgba(58, 139, 205, 0.32);
+  border-radius: 24px;  /* simple et classique */
+  padding: 28px 36px;
+  max-width: 580px;
+  width: 90%;
+  height: 140px;
+  font-size: 17px;
+  color: var(--thought-text);
+  font-style: normal;
+  font-weight: 300;
+  line-height: 1.7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(12px);
+  z-index: 25;
+  overflow: hidden;
+  
+  /* Shadow pour la profondeur */
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(58, 139, 205, 0.12);
+  
+  /* Animation d'apparition + bords fluides */
+  opacity: 0;
+  animation: 
+    thoughtAppear 0.7s ease forwards,
+    cloudyEdges 8s ease-in-out 0.7s infinite;
+  
+  transition:
+    background   var(--transition-mood),
+    border-color var(--transition-mood),
+    color        var(--transition-mood);
+}
+
+/* Cacher la bulle droite (on utilise que la gauche maintenant) */
+.thought-bubble.right {
+  display: none;
+}
+
+/* La bulle gauche devient la bulle principale (au-dessus) */
+.thought-bubble.left {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 80px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* En mode tension : bulle avec teinte rougeâtre + fond sombre */
+body.mood-tense .thought-bubble {
+  background:    rgba(30, 15, 18, 0.95);
+  border-color:  rgba(180, 60, 80, 0.40);
+  color:         rgba(220, 150, 160, 0.80);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(180, 60, 80, 0.20);
+}
+
+/* En mode critique : bulle rouge intense + fond très sombre */
+body.mood-critical .thought-bubble {
+  background:    rgba(40, 10, 15, 0.97);
+  border-color:  rgba(220, 40, 60, 0.48);
+  color:         rgba(240, 150, 160, 0.85);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(220, 40, 60, 0.28);
+}
+
+
+/* ------------------------------------------------------------
+   4.1 — Petits points de liaison des bulles de pensée
+   (les trois points entre la bulle et le téléphone)
+   MASQUÉS car la bulle est en haut fixe maintenant
+   ------------------------------------------------------------ */
+.thought-dots {
+  position: absolute;
+  display: none;  /* Complètement masqué */
+  gap: 3px;
+  align-items: center;
+}
+
+.thought-dots.left {
+  left: -36px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.thought-dots.right {
+  right: -36px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Chaque point */
+.dot {
+  border-radius: 50%;
+  background: var(--dot-color);
+  animation: dotPulse 2.2s ease-in-out infinite; /* défini dans base.css */
+  transition: background var(--transition-mood);
+  opacity: 0; /* Masquer les points puisque bulle en haut maintenant */
+}
+
+/* Taille croissante de gauche à droite */
+.dot:nth-child(1) { width: 4px; height: 4px; }
+.dot:nth-child(2) { width: 6px; height: 6px; animation-delay: 0.22s; }
+.dot:nth-child(3) { width: 8px; height: 8px; animation-delay: 0.44s; }
+
+/* Couleur des points selon le mood */
+body.mood-tense    .dot { background: rgba(220, 150, 160, 0.28); }
+body.mood-critical .dot { background: rgba(240, 140, 150, 0.30); }
+
+
+/* ============================================================
+   SECTION 5 — OMBRE DU TÉLÉPHONE SELON L'HUMEUR
+   ============================================================ */
+
+/* En mode tension : halo rouge-sombre */
+body.mood-tense .phone {
+  box-shadow:
+    0 0 0   7px rgba(0, 0, 0, 0.45),
+    0 0 100px rgba(160, 20,  40, 0.07),
+    0 0 200px rgba(160, 20,  40, 0.04),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+/* En mode critique : halo rouge intense */
+body.mood-critical .phone {
+  box-shadow:
+    0 0 0   7px rgba(0, 0, 0, 0.60),
+    0 0 120px rgba(220, 20, 40, 0.14),
+    0 0 240px rgba(220, 20, 40, 0.07),
+    inset 0 0 0 1px rgba(255, 80, 80, 0.05);
+}
+
+
+/* ============================================================
+   SECTION 6 — BOUTONS DE CONTRÔLE (démo des moods)
+   Présents uniquement pendant le développement.
+   À retirer ou masquer pour la version finale.
+   ============================================================ */
+.controls {
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+  position: relative;
+}
+
+.mood-btn {
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: 0.5px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mood-btn:hover {
+  background: rgba(212, 201, 176, 0.10);
+  color:      rgba(212, 201, 176, 0.85);
+  border-color: rgba(212, 201, 176, 0.32);
+}
+
+.mood-btn.active {
+  background:   rgba(212, 201, 176, 0.11);
+  color:        rgba(212, 201, 176, 1);
+  border-color: rgba(212, 201, 176, 0.48);
+}

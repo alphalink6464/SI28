@@ -1,0 +1,259 @@
+/* ============================================================
+   ATMOSPHERE.CSS — Nuages, états d'humeur, effets visuels
+   ============================================================
+   Ce fichier gère tout ce qui entoure le téléphone :
+   - L'arrière-plan et les nuages
+   - Les 3 états d'humeur (calme → tension → critique)
+   - L'effet CRT (scanlines + grain)
+   - La vignette (assombrissement des bords)
+
+   COMMENT ÇA MARCHE :
+   Le fichier définit un état "calme" par défaut.
+   Quand JavaScript ajoute la classe "mood-tense" ou
+   "mood-critical" au <body>, les règles correspondantes
+   écrasent automatiquement les valeurs par défaut.
+   ============================================================ */
+
+
+/* ============================================================
+   SECTION 1 — ÉTAT PAR DÉFAUT : CALME
+   Fond légèrement tamisé, nuages beiges doux.
+   ============================================================ */
+
+body {
+  /* Couleur de fond en mode calme */
+  background: #2e2c38;
+}
+
+
+/* ------------------------------------------------------------
+   1.1 — Effets CRT (texture "vieille télé")
+   Deux couches superposées, toujours actives quel que soit
+   l'état d'humeur.
+   ------------------------------------------------------------ */
+
+/* Scanlines : fines lignes horizontales semi-transparentes */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.025) 2px,
+    rgba(0, 0, 0, 0.025) 4px
+  );
+  pointer-events: none; /* ne bloque pas les clics */
+  z-index: 1000;        /* toujours au-dessus de tout */
+}
+
+/* Grain : texture de bruit qui se déplace en boucle */
+body::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  /* Grain SVG encodé en base64 pour éviter un fichier externe */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 999;
+  animation: grain 0.5s steps(1) infinite; /* défini dans base.css */
+}
+
+
+/* ------------------------------------------------------------
+   1.2 — Vignette (bords assombris)
+   Crée une profondeur et concentre le regard sur le centre.
+   S'intensifie avec les états de tension.
+   ------------------------------------------------------------ */
+.vignette {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 35%,
+    rgba(0, 0, 0, 0.32) 100%
+  );
+  pointer-events: none;
+  z-index: 5;
+  transition: background var(--transition-mood); /* défini dans base.css */
+}
+
+
+/* ------------------------------------------------------------
+   1.3 — Conteneur de la scène
+   Couvre tout l'écran et centre le téléphone.
+   ------------------------------------------------------------ */
+.scene {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* ------------------------------------------------------------
+   1.4 — Conteneur des nuages
+   Couvre toute la scène, en arrière-plan.
+   ------------------------------------------------------------ */
+.clouds {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* les nuages ne bloquent pas les clics */
+}
+
+
+/* ------------------------------------------------------------
+   1.5 — Propriétés communes à tous les nuages
+   Chaque nuage est un div avec border-radius: 50% et
+   un filtre blur fort qui donne l'aspect vaporeux.
+   ------------------------------------------------------------ */
+.cloud {
+  position: absolute;
+  border-radius: 50%;
+  /* Transition douce de toutes les propriétés lors d'un changement de mood */
+  transition:
+    background      var(--transition-mood),
+    opacity         var(--transition-mood),
+    filter          var(--transition-mood),
+    left            4s ease,
+    right           4s ease,
+    top             var(--transition-mood),
+    width           var(--transition-mood),
+    height          var(--transition-mood);
+}
+
+
+/* ------------------------------------------------------------
+   1.6 — Nuages côté GAUCHE (6 couches, de grande à petite)
+   Nommés cl-a (plus grand, plus profond) à cl-f (plus petit)
+   ------------------------------------------------------------ */
+.cl-a { width: 700px; height: 500px; left: -220px; top: -8%;  background: #cac1ab; opacity: .13; filter: blur(90px);  animation: cloudFloat1 22s ease-in-out infinite; }
+.cl-b { width: 520px; height: 380px; left:  -80px; top:  6%;  background: #ddd5be; opacity: .10; filter: blur(72px);  animation: cloudFloat2 17s ease-in-out infinite; }
+.cl-c { width: 360px; height: 270px; left:   28px; top: 20%;  background: #eee6d2; opacity: .08; filter: blur(56px);  animation: cloudFloat3 13s ease-in-out infinite; }
+.cl-d { width: 440px; height: 320px; left: -100px; top: 43%;  background: #cac1ab; opacity: .12; filter: blur(76px);  animation: cloudFloat1 19s ease-in-out infinite 2s; }
+.cl-e { width: 290px; height: 210px; left:   48px; top: 57%;  background: #ddd5be; opacity: .09; filter: blur(52px);  animation: cloudFloat2 15s ease-in-out infinite 1s; }
+.cl-f { width: 620px; height: 430px; left: -190px; top: 66%;  background: #b8b09a; opacity: .11; filter: blur(86px);  animation: cloudFloat3 25s ease-in-out infinite; }
+
+/* Côté DROIT — miroir du gauche */
+.cr-a { width: 680px; height: 490px; right: -210px; top: -4%;  background: #cac1ab; opacity: .13; filter: blur(90px);  animation: cloudFloat2 20s ease-in-out infinite; }
+.cr-b { width: 470px; height: 360px; right:  -60px; top: 10%;  background: #ddd5be; opacity: .10; filter: blur(70px);  animation: cloudFloat3 16s ease-in-out infinite 1s; }
+.cr-c { width: 330px; height: 250px; right:   18px; top: 28%;  background: #eee6d2; opacity: .08; filter: blur(54px);  animation: cloudFloat1 12s ease-in-out infinite 0.5s; }
+.cr-d { width: 510px; height: 370px; right: -145px; top: 48%;  background: #cac1ab; opacity: .12; filter: blur(80px);  animation: cloudFloat2 21s ease-in-out infinite 3s; }
+.cr-e { width: 270px; height: 200px; right:   38px; top: 61%;  background: #ddd5be; opacity: .09; filter: blur(50px);  animation: cloudFloat3 14s ease-in-out infinite 2s; }
+.cr-f { width: 590px; height: 410px; right: -165px; top: 71%;  background: #b8b09a; opacity: .11; filter: blur(84px);  animation: cloudFloat1 24s ease-in-out infinite 1s; }
+
+/* Lés atmosphériques (haut, bas, centre) */
+.ca-t { width: 100%; height: 300px; left: 0; top:    -80px; background: #d8d1bc; opacity: .08; filter: blur(100px); border-radius: 50%; animation: cloudFloat1 30s ease-in-out infinite; }
+.ca-b { width: 100%; height: 300px; left: 0; bottom: -80px; background: #c4bba8; opacity: .07; filter: blur(100px); border-radius: 50%; animation: cloudFloat2 28s ease-in-out infinite; }
+.ca-c { width: 60%;  height: 60%;   left: 20%; top: 20%;   background: #d4c9b0; opacity: .04; filter: blur(120px); border-radius: 50%; animation: cloudFloat3 35s ease-in-out infinite; }
+
+
+/* ------------------------------------------------------------
+   1.7 — Label du chapitre (coin supérieur)
+   ------------------------------------------------------------ */
+.chapter-label {
+  position: fixed;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: rgba(212, 201, 176, 0.28);
+  text-transform: uppercase;
+  z-index: 20;
+  transition: color var(--transition-mood);
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   SECTION 2 — ÉTAT : TENSION  (body.mood-tense)
+   Les nuages rougissent et se resserrent vers le centre.
+   ============================================================ */
+
+body.mood-tense {
+  background: #16101a;
+}
+
+/* Nuages gauche — plus sombres, plus rouges, se rapprochent */
+body.mood-tense .cl-a { background: #4a2030; opacity: .32; filter: blur(80px); left: -100px; animation-duration: 5.5s; }
+body.mood-tense .cl-b { background: #3a1525; opacity: .28; filter: blur(62px); left:  -20px; animation-duration: 5s;   }
+body.mood-tense .cl-c { background: #5a2538; opacity: .22; filter: blur(48px); left:   60px; animation-duration: 4.5s; }
+body.mood-tense .cl-d { background: #3a1820; opacity: .28; filter: blur(68px); left:  -40px; animation-duration: 5s;   }
+body.mood-tense .cl-e { background: #4a2030; opacity: .20; filter: blur(44px); left:   80px; animation-duration: 4.5s; }
+body.mood-tense .cl-f { background: #2e1218; opacity: .30; filter: blur(78px); left:  -80px; animation-duration: 6s;   }
+
+/* Nuages droite — idem */
+body.mood-tense .cr-a { background: #4a2030; opacity: .32; filter: blur(80px); right: -100px; animation-duration: 5.5s; }
+body.mood-tense .cr-b { background: #3a1525; opacity: .28; filter: blur(62px); right:  -20px; animation-duration: 5s;   }
+body.mood-tense .cr-c { background: #5a2538; opacity: .22; filter: blur(48px); right:   60px; animation-duration: 4.5s; }
+body.mood-tense .cr-d { background: #3a1820; opacity: .28; filter: blur(68px); right:  -40px; animation-duration: 5s;   }
+body.mood-tense .cr-e { background: #4a2030; opacity: .20; filter: blur(44px); right:   80px; animation-duration: 4.5s; }
+body.mood-tense .cr-f { background: #2e1218; opacity: .30; filter: blur(78px); right:  -80px; animation-duration: 6s;   }
+
+/* Atmosphériques */
+body.mood-tense .ca-t { background: #3a1525; opacity: .18; }
+body.mood-tense .ca-b { background: #2e1218; opacity: .15; }
+body.mood-tense .ca-c { background: #4a1a28; opacity: .08; }
+
+/* Vignette plus prononcée avec teinte rouge */
+body.mood-tense .vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 22%,
+    rgba(25, 5, 10, 0.6) 100%
+  );
+}
+
+/* Label chapitre en rouge discret */
+body.mood-tense .chapter-label { color: rgba(200, 100, 110, 0.28); }
+
+
+/* ============================================================
+   SECTION 3 — ÉTAT : CRITIQUE  (body.mood-critical)
+   Les nuages se ferment presque sur le téléphone, rouge vif.
+   ============================================================ */
+
+body.mood-critical {
+  background: #0c0608;
+}
+
+/* Nuages gauche — très opaques, se resserrent fortement */
+body.mood-critical .cl-a { background: #6a1020; opacity: .55; filter: blur(65px); left:  -40px; animation-duration: 3s; }
+body.mood-critical .cl-b { background: #4e0a18; opacity: .50; filter: blur(50px); left:   60px; animation-duration: 2.8s; }
+body.mood-critical .cl-c { background: #7a1828; opacity: .42; filter: blur(40px); left:  120px; animation-duration: 2.5s; }
+body.mood-critical .cl-d { background: #520e1c; opacity: .48; filter: blur(55px); left:   20px; animation-duration: 3s; }
+body.mood-critical .cl-e { background: #6a1020; opacity: .40; filter: blur(38px); left:  140px; animation-duration: 2.5s; }
+body.mood-critical .cl-f { background: #3e0a14; opacity: .52; filter: blur(62px); left:    0px; animation-duration: 3.2s; }
+
+/* Nuages droite */
+body.mood-critical .cr-a { background: #6a1020; opacity: .55; filter: blur(65px); right:  -40px; animation-duration: 3s; }
+body.mood-critical .cr-b { background: #4e0a18; opacity: .50; filter: blur(50px); right:   60px; animation-duration: 2.8s; }
+body.mood-critical .cr-c { background: #7a1828; opacity: .42; filter: blur(40px); right:  120px; animation-duration: 2.5s; }
+body.mood-critical .cr-d { background: #520e1c; opacity: .48; filter: blur(55px); right:   20px; animation-duration: 3s; }
+body.mood-critical .cr-e { background: #6a1020; opacity: .40; filter: blur(38px); right:  140px; animation-duration: 2.5s; }
+body.mood-critical .cr-f { background: #3e0a14; opacity: .52; filter: blur(62px); right:    0px; animation-duration: 3.2s; }
+
+/* Atmosphériques */
+body.mood-critical .ca-t { background: #5a0e1c; opacity: .30; }
+body.mood-critical .ca-b { background: #3e0a14; opacity: .28; }
+body.mood-critical .ca-c { background: #6a0e20; opacity: .12; }
+
+/* Vignette quasi totale */
+body.mood-critical .vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 10%,
+    rgba(30, 0, 8, 0.85) 100%
+  );
+}
+
+/* Label chapitre rouge */
+body.mood-critical .chapter-label { color: rgba(200, 80, 80, 0.3); }
