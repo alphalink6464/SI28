@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataLand — Intro</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #000;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+  }
+
+  .cinema {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    background: #000;
+    overflow: hidden;
+  }
+
+  .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transform-origin: center center;
+  }
+
+  /* Letterbox */
+  .cinema::before,
+  .cinema::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 11%;
+    background: #000;
+    z-index: 20;
+    pointer-events: none;
+  }
+  .cinema::before { top: 0; }
+  .cinema::after  { bottom: 0; }
+
+  /* Vignette div — intensite geree par JS */
+  .vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 15;
+    pointer-events: none;
+  }
+
+  /* Fade overlay */
+  .fade-overlay {
+    position: absolute;
+    inset: 0;
+    background: #000;
+    opacity: 1;
+    z-index: 10;
+    pointer-events: none;
+    transition: none;
+  }
+
+  /* Panel UI slider */
+  .ui-panel {
+    position: fixed;
+    bottom: 14%;
+    right: 24px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .ui-panel label {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    text-align: right;
+  }
+  .ui-panel input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 90px;
+    height: 2px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  .ui-panel input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.65);
+    cursor: pointer;
+  }
+  .ui-hint {
+    position: fixed;
+    bottom: 13%;
+    right: 24px;
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.2);
+    text-transform: uppercase;
+    z-index: 100;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  /* Hide UI controls for users; vignette fixed by JS */
+  .ui-panel { display: none !important; }
+  .ui-hint  { display: none !important; }
+
+  /* Slides 2 et 3 */
+  @keyframes livreurDrift {
+    0%   { transform: translate(0px, 0px); }
+    100% { transform: translate(3px, -3px); }
+  }
+  #slide2 img { animation: livreurDrift 3.5s ease-in-out forwards; }
+
+  @keyframes telZoom {
+    0%   { transform: scale(1); }
+    100% { transform: scale(1.04); }
+  }
+  #slide3 img { position: relative; animation: telZoom 4s ease-in-out forwards; object-position: center 50%; }
+</style>
+</head>
+<body>
+
+<div class="cinema">
+  <div class="vignette" id="vignetteDiv"></div>
+  <div class="fade-overlay" id="fadeOverlay"></div>
+
+  <div class="slide" id="slide1">
+    <img id="img1" src="image/camionette.png" alt="Camionnette DataLand">
+  </div>
+  <div class="slide" id="slide2">
+    <img src="image/livreur.png" alt="Livreur">
+  </div>
+  <div class="slide" id="slide3">
+    <img src="image/tel.png" alt="Telephone">
+  </div>
+</div>
+
+<!-- Slider vignette -->
+<div class="ui-panel" id="uiPanel">
+  <label>Ombrage bords</label>
+</div>
+<div class="ui-hint" id="uiHint">survol → contrôles</div>
+
+<script>
+const FADE_DURATION  = 700;
+const FADE_BACK      = 700;
+const SLIDE_DURATION = 3800;
+const START_DELAY    = 300;
+
+const slides   = ['slide1','slide2','slide3'];
+const overlay  = document.getElementById('fadeOverlay');
+const vignette = document.getElementById('vignetteDiv');
+const uiPanel  = document.getElementById('uiPanel');
+const uiHint   = document.getElementById('uiHint');
+
+/* ─── Vignette ─── */
+function applyVignette(val) {
+  const t  = val / 100;
+  const s1 = (t * 0.50).toFixed(3);
+  const s2 = (t * 0.92).toFixed(3);
+  vignette.style.background =
+    `radial-gradient(ellipse at center, transparent 38%, rgba(0,0,0,${s1}) 62%, rgba(0,0,0,${s2}) 100%)`;
+}
+// Slider removed for users — fix vignette around 85%
+applyVignette(85);
+
+/* ─── Shake irregulier (bruit cosinus) ─── */
+const img1 = document.getElementById('img1');
+let shakeActive = false;
+let shakeRaf;
+let shakeStopTimeout = null;
+
+function rand() { return Math.random() * 2 - 1; }
+
+// Table de bruit statique par axe
+const NX = Array.from({length:48}, rand);
+const NY = Array.from({length:48}, rand);
+const NR = Array.from({length:48}, rand);
+
+function cosInterp(a, b, t) {
+  const f = (1 - Math.cos(t * Math.PI)) * 0.5;
+  return a*(1-f) + b*f;
+}
+function sampleNoise(arr, t) {
+  const n = arr.length;
+  const i = Math.floor(t) % n;
+  const j = (i+1) % n;
+  return cosInterp(arr[i], arr[j], t - Math.floor(t));
+}
+
+function startShake() {
+  shakeActive = true;
+  _clearPendingStop();
+  let t = 0;
+  const AMP_PX  = 5 //0.45;   // amplitude max pixels — tres doux
+  const AMP_ROT = 0.07 //0.035;  // amplitude max degres
+  let currentSpeed = 1.0;
+  let targetSpeed  = 1.0;
+  let speedTimer   = 0;
+  let lastNow      = null;
+
+  // Serie de vitesses cibles predefinies pour l irregularite
+  const speedPool = [0.5, 0.8, 1.2, 1.6, 0.7, 1.1, 0.4, 1.4, 0.9, 1.3];
+  let   spIdx = 0;
+
+  function tick(now) {
+    if (!shakeActive) { img1.style.transform = ''; return; }
+    if (!lastNow) lastNow = now;
+    const dt = Math.min((now - lastNow) / 1000, 0.05); // cap a 50ms
+    lastNow = now;
+
+    // Changer la vitesse cible aleatoirement
+    speedTimer -= dt;
+    if (speedTimer <= 0) {
+      targetSpeed = speedPool[spIdx++ % speedPool.length] * (0.6 + Math.random() * 0.7);
+      speedTimer  = 0.35 + Math.random() * 0.9;
+    }
+    // Lerp doux vers la cible
+    currentSpeed += (targetSpeed - currentSpeed) * dt * 4;
+
+    t += dt * currentSpeed * 2.2;
+
+    // Trois frequences superposees sur X pour brisure du rythme
+    const x = sampleNoise(NX, t * 0.9)  * AMP_PX * 0.6
+            + sampleNoise(NX, t * 1.7)  * AMP_PX * 0.3
+            + sampleNoise(NX, t * 3.1)  * AMP_PX * 0.1;
+    const y = sampleNoise(NY, t * 1.1)  * AMP_PX * 0.6
+            + sampleNoise(NY, t * 2.0)  * AMP_PX * 0.4;
+    const r = sampleNoise(NR, t * 0.65) * AMP_ROT;
+
+    img1.style.transform = `translate(${x}px,${y}px) rotate(${r}deg)`;
+    shakeRaf = requestAnimationFrame(tick);
+  }
+  shakeRaf = requestAnimationFrame(tick);
+}
+// If a stop was scheduled but the shake restarts, cancel the pending stop
+function _clearPendingStop() {
+  if (shakeStopTimeout) { clearTimeout(shakeStopTimeout); shakeStopTimeout = null; }
+}
+
+function stopShake() {
+  // Delay stopping the shake to allow a smoother transition (1.5s)
+  if (shakeStopTimeout) clearTimeout(shakeStopTimeout);
+  shakeStopTimeout = setTimeout(() => {
+    shakeActive = false;
+    cancelAnimationFrame(shakeRaf);
+    img1.style.transform = '';
+    shakeStopTimeout = null;
+  }, 1000);
+}
+
+/* ─── Fades ─── */
+function fadeToBlack() {
+  return new Promise(resolve => {
+    overlay.style.transition = `opacity ${FADE_DURATION}ms ease-in`;
+    overlay.style.opacity    = '1';
+    setTimeout(resolve, FADE_DURATION);
+  });
+}
+function fadeFromBlack() {
+  return new Promise(resolve => {
+    overlay.style.transition = `opacity ${FADE_BACK}ms ease-out`;
+    overlay.style.opacity    = '0';
+    setTimeout(resolve, FADE_BACK);
+  });
+}
+
+/* ─── Affichage d un slide ─── */
+function showSlide(index) {
+  slides.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.style.opacity = i === index ? '1' : '0';
+    if (i === index && i !== 0) {
+      const img = el.querySelector('img');
+      img.style.animation = 'none';
+      void img.offsetWidth;
+      img.style.animation = '';
+    }
+  });
+}
+
+/* ─── Sequence ─── */
+async function runSequence() {
+  overlay.style.opacity    = '1';
+  overlay.style.transition = 'none';
+  await new Promise(r => setTimeout(r, START_DELAY));
+
+  for (let i = 0; i < slides.length; i++) {
+    showSlide(i);
+    if (i === 0) {
+      startShake();
+      setTimeout(() => {
+        uiPanel.style.opacity = '0.7';
+        uiHint.style.opacity  = '0';
+      }, 600);
+    }
+
+    await fadeFromBlack();
+    await new Promise(r => setTimeout(r, SLIDE_DURATION));
+
+    if (i === 0) stopShake();
+    await fadeToBlack();
+    await new Promise(r => setTimeout(r, 120));
+  }
+
+  slides.forEach(id => { document.getElementById(id).style.opacity = '0'; });
+  overlay.style.opacity = '1';
+}
+
+window.addEventListener('load', () => setTimeout(runSequence, 200));
+
+</script>
+</body>
+</html>
