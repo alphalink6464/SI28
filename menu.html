@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataLand — Menu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0c0608;
+    }
+
+    /* ── Background tournant ── */
+    .bg-spin {
+      position: fixed;
+      /* Carré très grand centré via marges négatives — 
+         transform est réservé à la rotation uniquement */
+      width: 300vmax;
+      height: 300vmax;
+      top: 50%;
+      left: 50%;
+      margin-top: -150vmax;
+      margin-left: -150vmax;
+      background-image: url('image/menu_bg.png');
+      background-size: 45%;        /* ← ajuste ce % pour zoomer/dézoomer */
+      background-position: center;
+      background-repeat: no-repeat;
+      transform-origin: center center;
+      animation: spinBg 120s linear infinite;
+      opacity: 0.85;
+    }
+
+    @keyframes spinBg {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* Voile sombre très léger */
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(10, 4, 6, 0.05) 0%,
+        rgba(10, 4, 6, 0.22) 60%,
+        rgba(10, 4, 6, 0.45) 100%
+      );
+      z-index: 1;
+    }
+
+    /* ── Scène principale ── */
+    .scene {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    /* ── Téléphone centré ── */
+    .phone-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 60px;
+    }
+
+    .phone-img {
+      width: 1768px;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.5))
+              drop-shadow(0  8px 20px rgba(180, 40, 40, 0.15));
+    }
+
+    /* ── Zone bas : bienvenue + bouton ── */
+    .bottom-area {
+      position: absolute;
+      bottom: clamp(36px, 6vh, 72px);
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Texte de bienvenue */
+    .welcome-text {
+      font-family: 'DM Mono', monospace;
+      font-size: clamp(12px, 1.5vw, 16px);
+      letter-spacing: 0.28em;
+      color: rgba(230, 200, 190, 0.82);
+      text-transform: uppercase;
+      text-align: center;
+      text-shadow: 0 1px 12px rgba(0, 0, 0, 0.7);
+      /* Pas de hover — texte passif */
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Bouton COMMENCER — juste le texte, sans conteneur */
+    .btn-start {
+      font-family: 'DM Mono', monospace;
+      font-size: clamp(16px, 2vw, 22px);
+      letter-spacing: 0.38em;
+      color: rgba(240, 220, 210, 1);
+      text-transform: uppercase;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px 0;
+      position: relative;
+      transition: color 0.4s ease, text-shadow 0.4s ease;
+      text-shadow: 0 1px 16px rgba(0, 0, 0, 0.8);
+      user-select: none;
+    }
+
+    /* Pseudo-élément : ombre qui "recouvre" légèrement le texte au hover */
+    .btn-start::after {
+      content: attr(data-text);
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Copie exacte du texte, mais en ombre */
+      color: transparent;
+      text-shadow: none;
+      background: transparent;
+      /* Ombre portée en superposition */
+      box-shadow: none;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .btn-start:hover {
+      color: rgba(230, 210, 200, 0.45);
+      text-shadow:
+        0 0 12px rgba(200, 80, 80, 0.25),
+        0 2px  8px rgba(0, 0, 0, 0.60);
+    }
+
+    /* Petite ligne décorative sous le bouton au hover */
+    .btn-start::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) scaleX(0);
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(
+        to right,
+        transparent,
+        rgba(200, 80, 80, 0.45),
+        transparent
+      );
+      transition: transform 0.45s ease;
+      transform-origin: center;
+    }
+
+    .btn-start:hover::before {
+      transform: translateX(-50%) scaleX(1);
+    }
+
+    /* ── Grain CRT léger par-dessus tout ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.22;
+      pointer-events: none;
+      z-index: 10;
+      animation: grain 0.5s steps(1) infinite;
+    }
+
+    @keyframes grain {
+      0%   { transform: translate(0, 0); }
+      10%  { transform: translate(-2%, -3%); }
+      20%  { transform: translate(3%, 1%); }
+      30%  { transform: translate(-1%, 3%); }
+      40%  { transform: translate(2%, -1%); }
+      50%  { transform: translate(-3%, 2%); }
+      60%  { transform: translate(1%, -2%); }
+      70%  { transform: translate(-2%, 1%); }
+      80%  { transform: translate(3%, -3%); }
+      90%  { transform: translate(-1%, 2%); }
+    }
+
+    /* ── Apparition initiale ── */
+    .phone-wrap,
+    .bottom-area {
+      opacity: 0;
+      animation-fill-mode: both;
+    }
+
+    .phone-wrap  { animation: fadeUp 1.2s ease forwards 0.4s; }
+    .bottom-area { animation: fadeUp 1.0s ease forwards 0.9s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fond qui tourne -->
+  <div class="bg-spin"></div>
+  <!-- Voile radial -->
+  <div class="bg-overlay"></div>
+
+  <!-- Scène -->
+  <div class="scene">
+
+    <!-- Téléphone centré -->
+    <div class="phone-wrap">
+      <img class="phone-img" src="image/menu_phone.png" alt="DataLand Phone">
+    </div>
+
+    <!-- Bas de page : bienvenue + bouton -->
+    <div class="bottom-area">
+      <span class="welcome-text">Votre expérience vous attend</span>
+      <button class="btn-start" data-text="COMMENCER" onclick="window.location.href='index.html'">
+        COMMENCER
+      </button>
+    </div>
+
+  </div>
+
+</body>
+</html>
