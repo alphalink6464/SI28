@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataland - Scène 3</title>
+    <!-- Mêmes polices que scene2 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oxanium:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="phone.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #050508;
+            background-image: radial-gradient(circle at 50% 50%, #151520 0%, #050508 100%);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            user-select: none;
+            overflow: hidden;
+        }
+        :root {
+            --bg-color: #050508;
+            --phone-bg: #f7f9fc;
+            --phone-width: 340px;
+            --phone-height: 720px;
+            --primary: #3b82f6;
+            --text-dark: #1e293b;
+            --border-radius: 40px;
+        }
+        .hidden { display: none !important; }
+
+        /* Slideshow */
+        #slideshow {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 50;
+            background: #050508;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease;
+        }
+        .slide {
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1s ease, transform 1.5s ease;
+            transform: scale(0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .slide.active { opacity: 1; transform: scale(1); }
+
+        /* TV Screen Overlay (Étape 2) */
+        #tv-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000;
+            background-image: url('datalandTVnews.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        #tv-screen::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.05) 2px, rgba(255,255,255,0.05) 4px);
+            pointer-events: none;
+            z-index: 2;
+        }
+        .tv-live-band {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            background: #dc2626;
+            color: #fff;
+            padding: 8px 16px;
+            font-family: 'Oxanium', sans-serif;
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            z-index: 3;
+            animation: pulse 2s infinite;
+        }
+        .tv-content {
+            padding: 60px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            z-index: 3;
+        }
+        .tv-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 20px;
+            line-height: 1.1;
+            text-shadow: 2px 2px 0 #000;
+        }
+        .tv-subtitle {
+            font-size: 1.5rem;
+            color: #f1f5f9;
+            font-style: italic;
+            border-left: 4px solid #3b82f6;
+            padding-left: 20px;
+            text-shadow: 1px 1px 0 #000;
+        }
+        .tv-progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 4;
+        }
+        .tv-progress-fill {
+            height: 100%;
+            background: #3b82f6;
+            width: 0%;
+            animation: tvProgress 5s linear forwards;
+        }
+        @keyframes tvProgress { from { width: 0%; } to { width: 100%; } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        /* Scene */
+        #scene {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        /* Contrôles UI du joueur */
+        #controls-container {
+            position: absolute;
+            left: 5%;
+            top: 25%;
+            width: 320px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        @media (max-width: 900px) {
+            #scene { flex-direction: column; }
+            #controls-container {
+                position: static;
+                width: 100%;
+                order: -1;
+            }
+            #thought-bubble {
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%) translateY(-20px);
+                width: 90%;
+                max-width: 360px;
+                border-radius: 20px;
+                z-index: 1000;
+                margin: 0;
+                text-align: center;
+            }
+            #thought-bubble.visible {
+                transform: translateX(-50%) translateY(0);
+            }
+            #phone { transform: scale(0.9); }
+        }
+        #thought-bubble {
+            background: rgba(30, 30, 30, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px 25px;
+            color: #fff;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            pointer-events: auto;
+        }
+        #thought-bubble.visible { opacity: 1; transform: translateY(0); }
+        .instruction {
+            display: block;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .shake-anim { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .bounce-anim { animation: bounce 0.4s ease; }
+        @keyframes bounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Styles unifiés importés de phone.css */
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+        }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn-primary:active { transform: scale(0.98); }
+
+        /* Home Screen */
+        .home-screen {
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            transition: background 0.3s ease;
+            padding: 40px 16px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+        }
+        .apps-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px 10px;
+            padding: 0;
+            transition: all 0.5s ease;
+        }
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            animation: fadeInApp 0.5s ease forwards;
+        }
+        @keyframes fadeInApp {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .app {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 18px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s;
+            margin-bottom: 4px;
+            position: relative;
+        }
+        .app:active { transform: scale(0.9); }
+        .app svg { width: 26px; height: 26px; fill: #fff; }
+        .app-label {
+            font-size: 0.6rem;
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            text-align: center;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+        .bg-run { background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%); }
+        .bg-basket { background: linear-gradient(135deg, #d35400 0%, #000000 100%); }
+        .bg-music { background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); }
+        .bg-photos { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+        .bg-msg { background: #3b82f6; }
+        .bg-maps { background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%); }
+        .bg-shop { background: #a855f7; }
+        .bg-settings { background: #94a3b8; }
+        .bg-datawatch { background: linear-gradient(135deg, #1a0533, #4c1d95); }
+        
+        .badge-new {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.5rem;
+            font-weight: 800;
+            padding: 2px 4px;
+            border-radius: 6px;
+            border: 1px solid #fff;
+            z-index: 2;
+        }
+
+        /* Notifications iOS */
+        .ios-notification {
+            position: absolute;
+            top: 40px; left: 10px; right: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            z-index: 150;
+            transform: translateY(-150%);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .ios-notification.slide-down { transform: translateY(0); }
+        .ios-notification.slide-up { transform: translateY(-150%); }
+        .ios-notification-header { font-weight: 700; font-size: 0.95rem; color: #0f172a; margin-bottom: 4px; }
+        .ios-notification-body { font-size: 0.85rem; color: #475569; line-height: 1.4; }
+
+        /* Update Modal (Étape 3/4/5) */
+        #update-modal-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #update-modal-container.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .update-modal {
+            background: #fff;
+            width: 88%;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #update-modal-container.visible .update-modal { transform: scale(1); }
+        
+        #btn-close-update {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+        .update-icon {
+            font-family: 'Oxanium', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #3b82f6;
+            margin-bottom: 5px;
+        }
+        .update-subtitle {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .update-list {
+            list-style: none;
+            margin-bottom: 15px;
+            padding: 0;
+        }
+        .update-list li {
+            font-size: 0.85rem;
+            color: #334155;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .update-list li.subtle {
+            font-size: 0.7rem;
+            color: #cbd5e1;
+        }
+        .update-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 10px 0;
+        }
+        .update-micro {
+            font-size: 0.6rem;
+            color: #e2e8f0;
+            line-height: 1.3;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: #3b82f6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .install-steps {
+            font-size: 0.8rem;
+            color: #475569;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .install-step { opacity: 0; animation: fadeInModal 0.3s forwards; }
+        
+        @keyframes fadeInModal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Fade de fin */
+        .fade-to-black {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 900;
+            opacity: 0;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.5s ease;
+        }
+        .fade-to-black.active { opacity: 1; pointer-events: auto; }
+        .end-screen {
+            text-align: center;
+            color: #fff;
+            font-family: 'Oxanium', sans-serif;
+            animation: fadeInModal 2s ease forwards 1s;
+            opacity: 0;
+        }
+        .end-screen h1 { font-size: 2.5rem; margin-bottom: 20px; }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #fff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Slide d'intro -->
+    <div id="slideshow">
+        <div class="slide active" id="slide-1">
+            <svg viewBox="0 0 140 100" width="160" height="120">
+                <rect x="20" y="50" width="100" height="30" rx="4" fill="none" stroke="#fff" stroke-width="2"/>
+                <path d="M10,80 Q20,50 30,80 Z" fill="none" stroke="#fff" stroke-width="2"/>
+                <path d="M110,80 Q120,50 130,80 Z" fill="none" stroke="#fff" stroke-width="2"/>
+                <rect x="50" y="20" width="40" height="25" fill="#3b82f6" opacity="0.3" rx="2"/>
+                <rect x="50" y="20" width="40" height="25" fill="none" stroke="#3b82f6" stroke-width="2" rx="2"/>
+                <line x1="60" y1="45" x2="60" y2="50" stroke="#3b82f6" stroke-width="2"/>
+                <line x1="80" y1="45" x2="80" y2="50" stroke="#3b82f6" stroke-width="2"/>
+            </svg>
+            <p style="margin-top:20px; font-size:1.2rem; font-weight:600; letter-spacing:1px; color:#e2e8f0; font-family:'Inter', sans-serif;">Quelques jours plus tard...</p>
+        </div>
+        <div class="slide" id="slide-2">
+            <svg viewBox="0 0 140 100" width="160" height="120">
+                <rect x="10" y="10" width="120" height="80" rx="4" fill="none" stroke="#fff" stroke-width="3"/>
+                <path d="M 70,80 C 70,60 50,50 50,90 M 70,80 C 70,60 90,50 90,90" fill="none" stroke="#fff" stroke-width="2"/>
+                <circle cx="70" cy="40" r="10" fill="none" stroke="#fff" stroke-width="2"/>
+                <rect x="10" y="70" width="120" height="20" fill="#dc2626"/>
+                <text x="70" y="84" fill="#fff" font-family="'Oxanium', sans-serif" font-size="10" font-weight="bold" text-anchor="middle">BREAKING NEWS</text>
+            </svg>
+            <p style="margin-top:20px; font-size:1.2rem; font-weight:600; letter-spacing:1px; color:#e2e8f0; font-family:'Inter', sans-serif;">DatalandTV</p>
+        </div>
+        <div class="slide" id="slide-3">
+             <svg viewBox="0 0 140 100" width="160" height="120">
+                <rect x="55" y="20" width="30" height="60" rx="3" fill="none" stroke="#fff" stroke-width="2"/>
+                <path d="M 40,80 C 40,50 50,40 55,40 M 100,80 C 100,60 90,50 85,50" fill="none" stroke="#fff" stroke-width="2"/>
+            </svg>
+            <p style="margin-top:20px; font-size:1.2rem; font-weight:600; letter-spacing:1px; color:#e2e8f0; font-family:'Inter', sans-serif;">On prend le téléphone.</p>
+        </div>
+    </div>
+
+    <!-- Étape 2 : TV plein écran -->
+    <div id="tv-screen" class="hidden">
+        <div class="tv-live-band">🔴 EN DIRECT — DatalandTV</div>
+        <div class="tv-content">
+            <div class="tv-title">Le Dataland Phone : révolution technologique ou surveillance de masse ?</div>
+            <div class="tv-subtitle">Notre expert : « Ces téléphones savent tout... vraiment tout. »</div>
+        </div>
+        <div class="tv-progress-bar"><div class="tv-progress-fill"></div></div>
+    </div>
+
+    <!-- Scène principale -->
+    <div id="scene" class="hidden">
+        
+        <!-- Contrôles UI du joueur -->
+        <div id="controls-container">
+            <div id="thought-bubble" class="hidden">
+                <div class="bubble-text"></div>
+            </div>
+        </div>
+
+        <!-- Téléphone -->
+        <div id="phone-container" class="phone-container">
+            <div id="phone" class="phone">
+                <div class="notch"></div>
+                <div id="screen" class="screen">
+                    <div class="home-screen" id="home">
+                        <div class="status-bar"><span>20:14</span><span>📶 81%</span></div>
+                        <div class="apps-container" id="apps-container">
+                            <!-- Injecté via JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Update Modal -->
+                    <div id="update-modal-container">
+                        <div class="update-modal" id="update-modal">
+                            <button id="btn-close-update">✕</button>
+                            <div class="update-icon">✨ DataOS 2.0</div>
+                            <div class="update-subtitle">Mise à jour disponible</div>
+                            <ul class="update-list">
+                                <li>⚡ Fluidité améliorée</li>
+                                <li>🚀 Vitesse x2</li>
+                                <li>🔋 Autonomie +40%</li>
+                                <li>🧠 IA encore plus intuitive</li>
+                                <li class="subtle">🔒 Sécurité renforcée</li>
+                            </ul>
+                            <div class="update-divider"></div>
+                            <div class="update-micro">Cette mise à jour inclut une extension des permissions d'accès à vos données personnelles, biométriques et comportementales. En acceptant, vous autorisez Dataland à accéder à votre microphone, caméra, et tout appareil connecté dans votre domicile.</div>
+                            <button class="btn-primary" id="btn-update">Mettre à jour maintenant</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Fade de fin -->
+    <div class="fade-to-black" id="fade-end">
+        <div class="end-screen">
+            <h1>Fin de la Scène 3</h1>
+            <button class="btn-outline" onclick="window.location.href='scene4.html'">Continuer →</button>
+        </div>
+    </div>
+
+    <script>
+        const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        
+        const awaitClick = () => new Promise(resolve => {
+            const handler = () => {
+                document.removeEventListener('click', handler);
+                resolve();
+            };
+            setTimeout(() => document.addEventListener('click', handler), 50);
+        });
+
+        const awaitElementClick = (id) => new Promise(resolve => {
+            const el = document.getElementById(id);
+            if(!el) return resolve();
+            el.addEventListener('click', function handler() {
+                el.removeEventListener('click', handler);
+                resolve();
+            });
+        });
+
+        function showSlide(num) {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            document.getElementById('slide-' + num).classList.add('active');
+        }
+
+        function showThought(htmlText) {
+            return new Promise(resolve => {
+                const bubble = document.getElementById('thought-bubble');
+                bubble.querySelector('.bubble-text').innerHTML = htmlText;
+                bubble.classList.remove('hidden');
+                void bubble.offsetWidth;
+                bubble.classList.add('visible');
+                setTimeout(resolve, 500); 
+            });
+        }
+
+        function hideThought() {
+            return new Promise(resolve => {
+                const bubble = document.getElementById('thought-bubble');
+                bubble.classList.remove('visible');
+                setTimeout(() => {
+                    bubble.classList.add('hidden');
+                    resolve();
+                }, 400);
+            });
+        }
+        
+        let currentApps = [
+            { id: 'run', name: 'RunTracker', bg: 'bg-run', icon: '<svg viewBox="0 0 24 24"><path fill="white" d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"/></svg>' },
+            { id: 'basket', name: 'BasketNews', bg: 'bg-basket', icon: '<svg viewBox="0 0 24 24"><path fill="white" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm7.1 13.7c-1.7-.8-3.4-1.2-5.4-1.2-2 0-3.8.4-5.4 1.2l-1.3-1.8c2-1 4.2-1.4 6.7-1.4 2.4 0 4.7.4 6.7 1.4l-1.3 1.8zM12 4a8 8 0 0 1 6.5 3.3l-1.6 1.4C15.6 7 13.9 6 12 6s-3.6 1-4.9 2.7L5.5 7.3A8 8 0 0 1 12 4z"/></svg>' },
+            { id: 'music', name: 'Music', bg: 'bg-music', icon: '<svg viewBox="0 0 24 24"><path fill="white" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>' },
+            { id: 'photos', name: 'Photos', bg: 'bg-photos', icon: '<svg viewBox="0 0 24 24"><path fill="white" d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>' },
+            { id: 'msg', name: 'Messages', bg: 'bg-msg', icon: '<svg viewBox="0 0 24 24"><path fill="white" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>' },
+            { id: 'maps', name: 'Maps', bg: 'bg-maps', icon: '<svg viewBox="0 0 24 24"><path fill="white" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>' },
+            { id: 'shop', name: 'Shop', bg: 'bg-shop', icon: '<svg viewBox="0 0 24 24"><path fill="white" d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>' },
+            { id: 'settings', name: 'Paramètres', bg: 'bg-settings', icon: '<svg viewBox="0 0 24 24"><path fill="white" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.73 8.85c-.11.2-.06.47.12.61l2.03 1.58c-.04.3-.06.62-.06.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>' }
+        ];
+
+        function renderApps() {
+            const container = document.getElementById('apps-container');
+            container.innerHTML = '';
+            currentApps.forEach(app => {
+                let badge = '';
+                if(app.id === 'datawatch') {
+                    badge = '<div class="badge-new">NEW</div>';
+                }
+                container.innerHTML += `
+                    <div class="app-wrapper">
+                        <div class="app ${app.bg}">
+                            ${app.icon}
+                            ${badge}
+                        </div>
+                        <div class="app-label">${app.name}</div>
+                    </div>
+                `;
+            });
+        }
+
+        async function runScenario() {
+            // --- ETAPE 1: Slideshow ---
+            await wait(2000);
+            showSlide(2);
+            await wait(2000);
+            showSlide(3);
+            await wait(2000);
+            
+            const slideshow = document.getElementById('slideshow');
+            slideshow.style.opacity = '0';
+            await wait(1000);
+            slideshow.classList.add('hidden');
+            
+            // --- ETAPE 2: Écran TV ---
+            const tvScreen = document.getElementById('tv-screen');
+            tvScreen.classList.remove('hidden');
+            
+            let tvClosed = false;
+            const closeTv = () => {
+                if(tvClosed) return;
+                tvClosed = true;
+                tvScreen.style.transform = 'scale(0.1)';
+                tvScreen.style.opacity = '0';
+                setTimeout(() => tvScreen.classList.add('hidden'), 500);
+            };
+            
+            tvScreen.addEventListener('click', closeTv);
+            setTimeout(closeTv, 5000); // Fait disparaître après 5s
+            
+            await wait(1000);
+            document.getElementById('scene').classList.remove('hidden');
+            const screen = document.getElementById('screen');
+            screen.classList.add('on');
+            
+            renderApps();
+            
+            await wait(5500); // Laisse le temps à la TV de se fermer
+            
+            // --- ETAPE 3: Popup mise à jour ---
+            await showThought(`Tiens, une notification...<span class="instruction">(Cliquez)</span>`);
+            await awaitClick();
+            await hideThought();
+            
+            const updateModalContainer = document.getElementById('update-modal-container');
+            updateModalContainer.classList.add('visible');
+            
+            // --- ETAPE 4: Comportement du refus ---
+            let btnClose = document.getElementById('btn-close-update');
+            let btnUpdate = document.getElementById('btn-update');
+            
+            const action1 = await Promise.race([
+                awaitElementClick('btn-close-update').then(() => 'close1'),
+                awaitElementClick('btn-update').then(() => 'update')
+            ]);
+            
+            if (action1 === 'close1') {
+                updateModalContainer.classList.remove('visible');
+                await wait(400);
+                await showThought(`Je ferai ça plus tard...<span class="instruction">(Cliquez)</span>`);
+                await awaitClick();
+                await hideThought();
+                
+                await wait(2000);
+                
+                // Réapparaît avec ✕ plus petite
+                btnClose.style.fontSize = '0.55rem';
+                btnClose.style.color = '#f1f5f9';
+                updateModalContainer.classList.add('visible');
+                
+                await wait(500);
+                await showThought(`Encore ?!<span class="instruction">(Cliquez)</span>`);
+                await awaitClick();
+                await hideThought();
+                
+                const action2 = await Promise.race([
+                    awaitElementClick('btn-close-update').then(() => 'close2'),
+                    awaitElementClick('btn-update').then(() => 'update')
+                ]);
+                
+                if(action2 === 'close2') {
+                    updateModalContainer.classList.remove('visible');
+                    await wait(500);
+                    // Réapparaît SANS ✕
+                    btnClose.remove();
+                    updateModalContainer.classList.add('visible');
+                    
+                    await wait(400);
+                    await showThought(`Attends... je peux plus la fermer ?!<span class="instruction">(Cliquez)</span>`);
+                    document.getElementById('thought-bubble').classList.add('shake-anim');
+                    await awaitClick();
+                    document.getElementById('thought-bubble').classList.remove('shake-anim');
+                    
+                    await awaitElementClick('btn-update');
+                }
+            } else {
+                // Il a cliqué direct sur update
+            }
+            
+            // --- ETAPE 5: Installation de la mise à jour ---
+            // On cache la pensée s'il en restait une
+            await hideThought();
+            
+            const modal = document.getElementById('update-modal');
+            modal.innerHTML = `
+                <div class="update-icon">✨ DataOS 2.0</div>
+                <div class="update-subtitle">Installation en cours...</div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <div class="install-steps" id="install-steps"></div>
+            `;
+            
+            const steps = [
+                { text: "✓ Téléchargement complet", color: "#475569" },
+                { text: "✓ Installation du système...", color: "#475569" },
+                { text: "✓ Configuration de votre profil étendu...", color: "#475569" },
+                { text: "✓ Synchronisation des données comportementales...", color: "#475569" },
+                { text: "✓ Analyse des habitudes de sommeil...", color: "#f59e0b" },
+                { text: "✓ Accès microphone activé...", color: "#f59e0b" },
+                { text: "✓ Accès caméra activé...", color: "#f59e0b" },
+                { text: "✓ Connexion aux appareils du domicile...", color: "#ef4444" },
+                { text: "✓ Terminé.", color: "#10b981", weight: "bold" }
+            ];
+            
+            const stepsContainer = document.getElementById('install-steps');
+            const progressFill = document.getElementById('progress-fill');
+            
+            for (let i = 0; i < steps.length; i++) {
+                const step = steps[i];
+                const p = document.createElement('div');
+                p.className = 'install-step';
+                p.style.color = step.color;
+                if(step.weight) p.style.fontWeight = step.weight;
+                p.innerText = step.text;
+                stepsContainer.appendChild(p);
+                
+                progressFill.style.width = `${((i+1)/steps.length)*100}%`;
+                
+                await wait(1200);
+            }
+            
+            await wait(1500);
+            updateModalContainer.classList.remove('visible');
+            await wait(500);
+            
+            // --- ETAPE 6: Retour home screen modifié ---
+            await showThought(`Euh... il a accédé à quoi exactement ?<span class="instruction">(Cliquez)</span>`);
+            document.getElementById('thought-bubble').classList.add('shake-anim');
+            await awaitClick();
+            document.getElementById('thought-bubble').classList.remove('shake-anim');
+            await hideThought();
+            
+            // Ajout de DataWatch au début
+            currentApps.unshift({ 
+                id: 'datawatch', 
+                name: 'DataWatch', 
+                bg: 'bg-datawatch', 
+                icon: '<svg viewBox="0 0 24 24"><path fill="white" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>' 
+            });
+            renderApps();
+            
+            await wait(800);
+            
+            await showThought(`Je n'ai pas installé cette app moi...<span class="instruction">(Cliquez)</span>`);
+            await awaitClick();
+            await hideThought();
+            
+            // --- ETAPE 7: Notification DataWatch ---
+            const watchNotifHTML = `
+                <div class="ios-notification" id="notif-watch">
+                    <div class="ios-notification-header">👁️ DataWatch</div>
+                    <div class="ios-notification-body">Bonjour. Nous avons remarqué que vous regardiez un reportage sur Dataland ce soir. Tout va bien ?</div>
+                </div>`;
+            document.getElementById('screen').insertAdjacentHTML('beforeend', watchNotifHTML);
+            
+            await wait(100);
+            document.getElementById('notif-watch').classList.add('slide-down');
+            
+            await wait(4000);
+            document.getElementById('notif-watch').classList.remove('slide-down');
+            document.getElementById('notif-watch').classList.add('slide-up');
+            
+            await wait(500);
+            
+            await showThought(`Il regardait avec moi ?! Il a accès à MA TÉLÉ ?!<span class="instruction">(Cliquez)</span>`);
+            const tb = document.getElementById('thought-bubble');
+            tb.classList.add('shake-anim', 'bounce-anim');
+            await awaitClick();
+            tb.classList.remove('shake-anim', 'bounce-anim');
+            await hideThought();
+            
+            // --- ETAPE 8: Fin de scène ---
+            await showThought(`Ce téléphone... jusqu'où il va aller ?<span class="instruction">(Cliquez)</span>`);
+            await awaitClick();
+            await hideThought();
+            
+            const fadeOverlay = document.createElement('div');
+            fadeOverlay.style.position = 'absolute';
+            fadeOverlay.style.top = '0';
+            fadeOverlay.style.left = '0';
+            fadeOverlay.style.width = '100%';
+            fadeOverlay.style.height = '100%';
+            fadeOverlay.style.background = '#000';
+            fadeOverlay.style.opacity = '0';
+            fadeOverlay.style.transition = 'opacity 1.5s ease';
+            fadeOverlay.style.zIndex = '999';
+            document.getElementById('screen').appendChild(fadeOverlay);
+            
+            // Force reflow
+            void fadeOverlay.offsetWidth;
+            fadeOverlay.style.opacity = '1';
+            
+            await wait(1500);
+            
+            const endOverlay = document.getElementById('fade-end');
+            endOverlay.classList.add('active');
+        }
+
+        // Démarrage
+        window.addEventListener('DOMContentLoaded', () => {
+            runScenario();
+        });
+    </script>
+</body>
+</html>

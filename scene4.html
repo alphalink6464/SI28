@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataland - Scène 4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Oxanium:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Centralized Phone Design System inlined for iframe compatibility */
+        :root {
+            --phone-width: 340px;
+            --phone-height: 720px;
+            --border-radius: 40px;
+            --phone-bg: #f7f9fc;
+        }
+
+        .phone-container {
+            position: relative;
+            z-index: 5;
+            filter: drop-shadow(0 25px 50px rgba(0,0,0,0.55));
+            transition: transform 0.5s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .phone {
+            width: var(--phone-width);
+            height: var(--phone-height);
+            background: #000;
+            border-radius: var(--border-radius);
+            border: 10px solid #1a1a1a;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.25);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-sizing: content-box;
+        }
+
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 30px;
+            background: #1a1a1a;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+            z-index: 200;
+        }
+
+        .notch::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 40px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #0a0a0a;
+        }
+        .notch::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 65px;
+            width: 40px;
+            height: 5px;
+            border-radius: 5px;
+            background: #0a0a0a;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.5s ease;
+            border-radius: calc(var(--border-radius) - 10px);
+        }
+
+        .screen.on {
+            background: var(--phone-bg);
+        }
+
+        .phone-container.ambient-on::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            border-radius: var(--border-radius);
+            box-shadow: 0 0 80px 30px rgba(255, 180, 80, 0.15);
+            z-index: -1;
+            animation: fadeInAmbientLight 2s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes fadeInAmbientLight {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 400px) {
+            .phone-container {
+                transform: scale(0.9);
+            }
+        }
+        @media (max-height: 800px) {
+            .phone-container {
+                transform: scale(0.85);
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background-color: #020204;
+            background-image: 
+                radial-gradient(circle at 50% 50%, #0d1527 0%, #020204 100%);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            user-select: none;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Scanlines overlay for cyberpunk feel */
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            z-index: 9999;
+            background-size: 100% 3px;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Cinematic Dystopian Splash Intro Overlay */
+        .intro-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .intro-content {
+            text-align: center;
+            max-width: 460px;
+            padding: 40px;
+            font-family: 'Inter', sans-serif;
+        }
+        .intro-content .logo {
+            width: 70px;
+            height: 70px;
+            margin-bottom: 24px;
+            filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.45));
+            animation: pulsateLogo 3s ease-in-out infinite;
+        }
+        @keyframes pulsateLogo {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.7)); }
+        }
+        .intro-content h2 {
+            font-family: 'Oxanium', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 5px;
+            color: #fff;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        .intro-content p {
+            font-size: 0.95rem;
+            color: #64748b;
+            margin-bottom: 40px;
+            line-height: 1.7;
+            letter-spacing: 0.5px;
+        }
+        .btn-start-scene {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            padding: 16px 36px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-family: 'Oxanium', sans-serif;
+            letter-spacing: 2px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
+        }
+        .btn-start-scene:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.35);
+            transform: translateY(-2px);
+        }
+        .btn-start-scene:active {
+            transform: translateY(0);
+        }
+
+        /* Lock Screen Styling */
+        .lock-screen {
+            position: absolute;
+            inset: 0;
+            background: #020205;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 80px 20px 40px;
+            z-index: 50;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            background-image: 
+                radial-gradient(circle at 50% 30%, rgba(13, 21, 39, 0.4) 0%, rgba(2, 2, 5, 0) 70%);
+        }
+        .lock-clock {
+            font-family: 'Oxanium', sans-serif;
+            font-size: 3.2rem;
+            font-weight: 400;
+            color: #fff;
+            letter-spacing: 1px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+            margin-top: 20px;
+        }
+        .lock-date {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* Ambient sweeping blue reflections */
+        .reflection-sweep {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(59, 130, 246, 0.05) 50%, transparent 60%);
+            background-size: 200% 200%;
+            animation: sweepReflections 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes sweepReflections {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        /* Lockscreen Banner clickable preview */
+        .lock-notification {
+            position: absolute;
+            top: 220px;
+            left: 12px;
+            right: 12px;
+            background: rgba(12, 16, 28, 0.95);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            border-radius: 16px;
+            padding: 14px 16px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        .lock-notification.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .lock-notification:hover {
+            background: rgba(59, 130, 246, 0.12);
+            border-color: #3b82f6;
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.25);
+            transform: translateY(-2px);
+        }
+
+        /* Scene Layout */
+        #scene {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        /* Ambient Glow behind the Phone */
+        .ambient-glow {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 480px;
+            height: 800px;
+            border-radius: 100px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0) 70%);
+            filter: blur(80px);
+            z-index: 1;
+            pointer-events: none;
+            transition: background 1.5s ease, opacity 1s ease;
+        }
+        .ambient-glow.manipulated {
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.18) 0%, rgba(239, 68, 68, 0) 70%);
+        }
+
+        /* Smartphone Emergence Transition States */
+        .phone-container {
+            opacity: 0;
+            filter: brightness(0);
+            transform: translate3d(0, 50px, 0) scale(0.96);
+            transition: opacity 3s cubic-bezier(0.16, 1, 0.3, 1), 
+                        filter 3s cubic-bezier(0.16, 1, 0.3, 1), 
+                        transform 3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        .phone-container.emerged {
+            opacity: 1;
+            filter: brightness(1) drop-shadow(0 25px 60px rgba(0,0,0,0.7));
+            transform: translate3d(0, 0, 0) scale(1);
+        }
+
+        /* UI Control Panel (Thought Bubble + Choice Buttons) */
+        #controls-container {
+            position: absolute;
+            left: 5%;
+            top: 22%;
+            width: 325px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        @media (max-width: 1200px) {
+            #scene { flex-direction: column; }
+            #controls-container {
+                position: static;
+                width: 100%;
+                order: -1;
+                margin-bottom: 20px;
+            }
+            #thought-bubble {
+                position: fixed;
+                top: 30px;
+                left: 50%;
+                transform: translateX(-50%) translateY(-20px);
+                width: 90%;
+                max-width: 360px;
+                border-radius: 20px;
+                z-index: 99999;
+                margin: 0;
+                text-align: center;
+            }
+            #thought-bubble.visible {
+                transform: translateX(-50%) translateY(0);
+            }
+            #choices-container {
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 90%;
+                max-width: 360px;
+                z-index: 99999;
+            }
+            .phone-container { transform: scale(0.85); }
+        }
+
+        /* Elegant Neon Blue Thought Bubble (Strictly NO Purple) */
+        #thought-bubble {
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            padding: 24px;
+            border-radius: 24px 24px 24px 0;
+            font-family: 'Inter', sans-serif;
+            font-style: italic;
+            font-size: 1.05rem;
+            line-height: 1.5;
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.15);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.5s, box-shadow 0.5s;
+            color: #f1f5f9;
+            position: relative;
+        }
+        #thought-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            border-width: 15px 15px 0 0;
+            border-style: solid;
+            border-color: rgba(10, 15, 30, 0.85) transparent transparent transparent;
+        }
+        #thought-bubble.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #thought-bubble.glitch-thought {
+            border-color: rgba(239, 68, 68, 0.7);
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.35);
+            color: #fecaca;
+        }
+
+        .instruction {
+            display: block;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #93c5fd;
+            font-style: normal;
+            font-weight: 500;
+        }
+
+        .btn-continue-thought {
+            margin-top: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-family: 'Oxanium', sans-serif;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            outline: none;
+            font-weight: 600;
+        }
+        .btn-continue-thought:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: #3b82f6;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.25);
+        }
+        .glitch-thought .btn-continue-thought:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+        }
+
+        /* Choice Buttons (Neon red Option 1 / Neon blue Option 2) */
+        #choices-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        #choices-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .choice-btn {
+            background: rgba(8, 8, 12, 0.85);
+            border-radius: 14px;
+            cursor: pointer;
+            font-family: 'Oxanium', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            padding: 16px 22px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            text-align: left;
+            width: 100%;
+            outline: none;
+        }
+        
+        #btn-choice-a {
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #ef4444;
+        }
+        #btn-choice-a:hover {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: #ef4444;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        #btn-choice-b {
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            color: #3b82f6;
+        }
+        #btn-choice-b:hover {
+            background: rgba(59, 130, 246, 0.08);
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .choice-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Dark Dystopian Chat App UI */
+        .app-screen {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: #020205;
+            font-family: 'Inter', sans-serif;
+            position: absolute;
+            top: 0; left: 0; width: 100%; z-index: 40;
+            transition: filter 0.2s ease;
+        }
+        .app-header {
+            padding: 48px 20px 16px;
+            background: rgba(8, 8, 12, 0.98);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 2;
+        }
+        .app-header .back { color: #3b82f6; font-size: 0.85rem; font-weight: 500; opacity: 0.7; }
+        .app-header .title { font-weight: 600; font-size: 1.05rem; color: #fff; letter-spacing: 0.5px; }
+        .app-header .info { font-size: 0.75rem; color: #10b981; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .message-list {
+            flex: 1;
+            padding: 20px 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            background: 
+                radial-gradient(circle at center, rgba(13, 21, 39, 0.3) 0%, rgba(2, 2, 5, 0) 100%),
+                #020205;
+            padding-bottom: 40px;
+        }
+        .msg {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            animation: fadeInMsg 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            word-wrap: break-word;
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        @keyframes fadeInMsg {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .msg.sent {
+            align-self: flex-end;
+            background: #1d4ed8;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .msg.received {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            color: #e2e8f0;
+            border-bottom-left-radius: 4px;
+        }
+        .msg.typing {
+            align-self: flex-start;
+            background: transparent;
+            color: #64748b;
+            font-style: italic;
+            font-size: 0.8rem;
+            padding: 5px;
+        }
+        .message-input-area {
+            padding: 14px 16px 36px;
+            background: rgba(8, 8, 12, 0.98);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .message-input-area input {
+            flex: 1;
+            padding: 12px 18px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+            outline: none;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s;
+        }
+        .message-input-area input:focus {
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+        .message-input-area button {
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 42px; height: 42px;
+            display: flex; justify-content: center; align-items: center;
+            cursor: not-allowed;
+            opacity: 0.4;
+            transition: all 0.3s;
+        }
+        .message-input-area button.active-btn {
+            cursor: pointer;
+            opacity: 1;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+        }
+        .message-input-area button svg { fill: #fff; width: 18px; height: 18px; margin-left: 2px; }
+
+        /* Notification Banner Overlay area */
+        .notif-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            overflow: visible;
+            z-index: 150;
+            padding: 48px 12px 20px;
+        }
+        
+        /* Interactive overlay for clean notifications */
+        .ios-notification {
+            position: absolute;
+            left: 12px;
+            width: calc(100% - 24px);
+            box-sizing: border-box;
+            background: rgba(12, 16, 28, 0.96);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            color: #fff;
+            border-radius: 16px;
+            padding: 14px 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 10px;
+            animation: notifSlideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            transition: all 0.4s ease;
+        }
+        .ios-notification-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--notif-accent, #3b82f6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .ios-notification-body {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            line-height: 1.4;
+        }
+        @keyframes notifSlideDown {
+            from { transform: translateY(-40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Dystopian Overlapping Propaganda stacked Banners styling */
+        .propaganda-notif {
+            margin-bottom: 0 !important;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+        }
+
+        /* Notif levels shifting from calm blue/cyan news to aggressive, large crimson */
+        .notif-level-0 {
+            background: rgba(10, 18, 36, 0.95);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            --notif-accent: #3b82f6;
+            transform: scale(1);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .notif-level-1 {
+            background: rgba(8, 22, 38, 0.96);
+            border: 1px solid rgba(6, 182, 212, 0.35);
+            --notif-accent: #06b6d4;
+            transform: scale(1.02);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .notif-level-2 {
+            background: rgba(26, 12, 20, 0.97);
+            border: 1.5px solid rgba(239, 68, 68, 0.4);
+            --notif-accent: #f87171;
+            transform: scale(1.04) rotate(0.6deg);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .notif-level-3 {
+            background: rgba(38, 8, 14, 0.98);
+            border: 2px solid rgba(239, 68, 68, 0.65);
+            --notif-accent: #ef4444;
+            transform: scale(1.07) rotate(-1.2deg);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            font-weight: 500;
+        }
+        .notif-level-4 {
+            background: rgba(56, 4, 8, 0.99);
+            border: 2.2px solid rgba(239, 68, 68, 0.95);
+            --notif-accent: #dc2626;
+            transform: scale(1.1) rotate(1.8deg);
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            font-weight: 600;
+        }
+
+        /* Aggressive Scanlines & Screen Glitches overlay classes */
+        /* Subtle red vignette and premium environmental lighting for the manipulation scene */
+        .scanline-red {
+            position: absolute;
+            inset: 0;
+            box-shadow: inset 0 0 35px rgba(239, 68, 68, 0);
+            background: rgba(239, 68, 68, 0);
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 1.2s ease-in-out;
+            border-radius: calc(var(--border-radius) - 10px);
+        }
+        .scanline-red.active {
+            opacity: 1;
+            animation: redVignetteBreath 4s ease-in-out infinite alternate;
+        }
+        @keyframes redVignetteBreath {
+            0% { 
+                box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.15); 
+                background: rgba(239, 68, 68, 0.01); 
+            }
+            100% { 
+                box-shadow: inset 0 0 45px rgba(239, 68, 68, 0.3); 
+                background: rgba(239, 68, 68, 0.04); 
+            }
+        }
+
+        .glitch-phone {
+            animation: glitchGlow 3s ease-in-out infinite alternate;
+            border-color: #6b1d1d !important;
+            transition: border-color 1.5s ease;
+        }
+        @keyframes glitchGlow {
+            0% { 
+                box-shadow: 0 0 12px rgba(239, 68, 68, 0.12), inset 0 0 6px rgba(239, 68, 68, 0.1); 
+            }
+            100% { 
+                box-shadow: 0 0 24px rgba(239, 68, 68, 0.35), inset 0 0 12px rgba(239, 68, 68, 0.2); 
+            }
+        }
+
+        .glitch-screen {
+            animation: glitchVisualSimple 4s ease-in-out infinite alternate;
+        }
+        @keyframes glitchVisualSimple {
+            0% { 
+                filter: contrast(1) sepia(0) saturate(1); 
+            }
+            100% { 
+                filter: contrast(1.04) sepia(0.1) saturate(1.15) hue-rotate(-15deg); 
+            }
+        }
+
+        /* Final Ambient Ending Overlay */
+        .fade-to-black {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+        .fade-to-black.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .end-screen {
+            text-align: center;
+            color: #fff;
+            font-family: 'Oxanium', sans-serif;
+            transform: translateY(30px);
+            opacity: 0;
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 30px;
+            max-width: 600px;
+        }
+        .fade-to-black.active .end-screen {
+            transform: translateY(0);
+            opacity: 1;
+            transition-delay: 1.5s;
+        }
+        
+        .end-screen h2 {
+            font-size: 1.6rem;
+            line-height: 1.6;
+            font-weight: 400;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.5px;
+            margin-bottom: 50px;
+            color: #cbd5e1;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 15px 35px;
+            border-radius: 35px;
+            font-size: 0.95rem;
+            font-family: 'Oxanium', sans-serif;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-block;
+            outline: none;
+        }
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.25);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cinematic Splash Intro (Audio consent requirement) -->
+    <div id="intro-overlay" class="intro-overlay">
+        <div class="intro-content">
+            <!-- Sleek cyber SVG Logo -->
+            <svg class="logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="40" stroke="#3b82f6" stroke-width="2" stroke-dasharray="8 4"/>
+                <circle cx="50" cy="50" r="15" fill="#3b82f6" fill-opacity="0.08" stroke="#3b82f6" stroke-width="2"/>
+                <circle cx="50" cy="50" r="4" fill="#fff"/>
+            </svg>
+            <h2>CHAPITRE IV : DATALAND TV</h2>
+            <p>Une fiction interactive illustrant comment nos réseaux manipulent l'opinion publique sous influence.</p>
+            <button class="btn-start-scene" id="btn-start-scene">ACTIVER LE DÉVICE</button>
+        </div>
+    </div>
+
+    <!-- Main Scene Context -->
+    <div id="scene" class="hidden">
+        
+        <!-- Ambient atmospheric radial light -->
+        <div class="ambient-glow" id="ambient-glow"></div>
+
+        <!-- UI Control Panel (Thought Bubble + Choice Buttons) -->
+        <div id="controls-container">
+            <div id="thought-bubble" class="hidden">
+                <div class="bubble-text"></div>
+            </div>
+            <div id="choices-container" class="hidden">
+                <!-- Action Choices -->
+            </div>
+        </div>
+
+        <!-- Central Phone mockup wrapper -->
+        <div id="phone-container" class="phone-container">
+            <div id="phone" class="phone">
+                <div class="notch"></div>
+                <div id="screen" class="screen">
+                    
+                    <!-- Glitch/Scanline Overlays -->
+                    <div class="scanline-red" id="scanline-red"></div>
+
+                    <!-- Home / Lock Screen UI -->
+                    <div class="lock-screen" id="lock-screen">
+                        <div class="reflection-sweep"></div>
+                        <div class="lock-clock">--:--</div>
+                        <div class="lock-date">...</div>
+                        
+                        <!-- Lockscreen Notification Preview Banner -->
+                        <div class="lock-notification" id="lock-notif">
+                            <div class="ios-notification-header">💬 Ami 1 · à l'instant</div>
+                            <div class="ios-notification-body" style="font-weight: 500;">Yo… t'as vu le discours du président de Dataland ? J'ai l'impression qu'on sera bientôt en guerre...</div>
+                        </div>
+                    </div>
+
+                    <!-- Messenger Chat App Screen UI -->
+                    <div class="app-screen" id="app-screen" style="opacity: 0; pointer-events: none; transform: scale(0.92); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);">
+                        <div class="app-header">
+                            <span class="back">❮ Messagerie</span>
+                            <span class="title">Ami 1</span>
+                            <span class="info">En ligne</span>
+                        </div>
+                        <div class="message-list" id="msg-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="message-input-area">
+                            <input type="text" id="chat-input" placeholder="Entrez votre message..." disabled>
+                            <button id="chat-send-btn" disabled>
+                                <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Overlapping Stack Area for Banners -->
+                    <div class="notif-container" id="notif-area">
+                        <!-- Popups slide in here -->
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Final Cinematic Ending Overlay -->
+    <div class="fade-to-black" id="fade-end">
+        <div class="end-screen">
+            <h2 id="end-quote">"Ton fil d'actualité ne te montre pas le monde. Il te montre ce qu'il veut que tu croies."</h2>
+            <button class="btn-outline" id="btn-recommencer">Recommencer ↺</button>
+        </div>
+    </div>
+
+    <!-- Web Audio API Synthesizer Class -->
+    <script>
+        class CyberAudio {
+            constructor() {
+                this.ctx = null;
+                this.humNode = null;
+                this.heartbeatTimer = null;
+                this.heartbeatBpm = 0;
+            }
+
+            init() {
+                try {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContextClass();
+                    this.startHum();
+                } catch (e) {
+                    console.error("Audio Context not supported", e);
+                }
+            }
+
+            startHum() {
+                if (!this.ctx) return;
+                
+                const osc = this.ctx.createOscillator();
+                const lfo = this.ctx.createOscillator();
+                const lfoGain = this.ctx.createGain();
+                const filter = this.ctx.createBiquadFilter();
+                const mainGain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.value = 55; // Low atmospheric hum frequency
+
+                lfo.type = 'sine';
+                lfo.frequency.value = 0.25;
+                lfoGain.gain.value = 1.2;
+
+                filter.type = 'lowpass';
+                filter.frequency.value = 95;
+                filter.Q.value = 1.2;
+
+                mainGain.gain.value = 0.07; // subtle volume
+
+                lfo.connect(lfoGain);
+                lfoGain.connect(osc.frequency);
+                osc.connect(filter);
+                filter.connect(mainGain);
+                mainGain.connect(this.ctx.destination);
+
+                osc.start();
+                lfo.start();
+
+                this.humNode = { osc, lfo, mainGain, filter };
+            }
+
+            setHumFrequency(freq, duration = 1.5) {
+                if (!this.humNode || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                this.humNode.osc.frequency.setValueAtTime(this.humNode.osc.frequency.value, now);
+                this.humNode.osc.frequency.exponentialRampToValueAtTime(freq, now + duration);
+            }
+
+            setHumGain(vol, duration = 0.8) {
+                if (!this.humNode || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                this.humNode.mainGain.gain.setValueAtTime(this.humNode.mainGain.gain.value, now);
+                this.humNode.mainGain.gain.linearRampToValueAtTime(vol, now + duration);
+            }
+
+            playUnlock() {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(350, now);
+                osc.frequency.exponentialRampToValueAtTime(700, now + 0.25);
+
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.08, now + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(now + 0.35);
+            }
+
+            playClick() {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(450, now);
+
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.06, now + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(now + 0.08);
+            }
+
+            playNotification(isAggressive = false, pitchOffset = 0) {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+
+                const osc1 = this.ctx.createOscillator();
+                const osc2 = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc1.type = 'sine';
+                osc2.type = 'sine';
+
+                if (!isAggressive) {
+                    // Harmonized pleasing dual tone chime
+                    osc1.frequency.setValueAtTime(880, now);
+                    osc2.frequency.setValueAtTime(1320, now);
+                    
+                    gain.gain.setValueAtTime(0, now);
+                    gain.gain.linearRampToValueAtTime(0.12, now + 0.04);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                } else {
+                    // Detuned, sweeping high chime for cognitive tension
+                    const base = 650 + pitchOffset;
+                    osc1.frequency.setValueAtTime(base, now);
+                    osc2.frequency.setValueAtTime(base * 1.51 + (Math.random() * 15 - 7), now);
+                    
+                    osc1.frequency.exponentialRampToValueAtTime(base * 0.6, now + 0.35);
+
+                    gain.gain.setValueAtTime(0, now);
+                    gain.gain.linearRampToValueAtTime(0.18, now + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+                }
+
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc1.start();
+                osc2.start();
+                osc1.stop(now + 0.7);
+                osc2.stop(now + 0.7);
+            }
+
+            playHeartbeat(bpm) {
+                if (this.heartbeatTimer) {
+                    this.heartbeatBpm = bpm;
+                    return;
+                }
+                this.heartbeatBpm = bpm;
+                this.triggerHeartbeat();
+            }
+
+            setHeartbeatBpm(bpm) {
+                this.heartbeatBpm = bpm;
+            }
+
+            triggerHeartbeat() {
+                if (!this.ctx || this.heartbeatBpm === 0) return;
+                const now = this.ctx.currentTime;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.exponentialRampToValueAtTime(15, now + 0.15);
+
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.35, now + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(now + 0.25);
+
+                // Weak secondary thump
+                const subThumpTime = now + 0.2;
+                const osc2 = this.ctx.createOscillator();
+                const gain2 = this.ctx.createGain();
+
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(90, subThumpTime);
+                osc2.frequency.exponentialRampToValueAtTime(15, subThumpTime + 0.15);
+
+                gain2.gain.setValueAtTime(0, subThumpTime);
+                gain2.gain.linearRampToValueAtTime(0.2, subThumpTime + 0.02);
+                gain2.gain.exponentialRampToValueAtTime(0.001, subThumpTime + 0.22);
+
+                osc2.connect(gain2);
+                gain2.connect(this.ctx.destination);
+
+                osc2.start(subThumpTime);
+                osc2.stop(subThumpTime + 0.25);
+
+                const delay = 60 / this.heartbeatBpm;
+                this.heartbeatTimer = setTimeout(() => this.triggerHeartbeat(), delay * 1000);
+            }
+
+            stopHeartbeat() {
+                if (this.heartbeatTimer) {
+                    clearTimeout(this.heartbeatTimer);
+                    this.heartbeatTimer = null;
+                }
+                this.heartbeatBpm = 0;
+            }
+
+            playGlitch() {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                
+                const bufferSize = this.ctx.sampleRate * 0.12; // short 120ms
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.setValueAtTime(1200 + Math.random() * 1500, now);
+                filter.Q.value = 6;
+
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.1, now + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                noise.start();
+            }
+
+            mute() {
+                this.stopHeartbeat();
+                this.setHumGain(0, 0.25);
+            }
+        }
+    </script>
+
+    <!-- Narrative Logic & Cinematic Timers script -->
+    <script>
+        const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        
+        const awaitClick = () => new Promise(resolve => {
+            const handler = () => {
+                document.removeEventListener('click', handler);
+                resolve();
+            };
+            setTimeout(() => document.addEventListener('click', handler), 50);
+        });
+
+        // Instantiate audio controller
+        const audio = new CyberAudio();
+
+        // Unlock overlay interaction
+        document.getElementById('btn-start-scene').addEventListener('click', async () => {
+            // Fades splash out
+            const splash = document.getElementById('intro-overlay');
+            splash.style.opacity = '0';
+            await wait(1500);
+            splash.remove();
+
+            // Display main context
+            document.getElementById('scene').classList.remove('hidden');
+            updateLockClock(); // Initialize clock immediately so there is no visual glitch
+            
+            // Audio context start
+            audio.init();
+
+            // Slowly emerge the phone mockup
+            await wait(300);
+            const container = document.getElementById('phone-container');
+            container.classList.add('emerged');
+
+            // Launch scenario flow
+            await wait(2200);
+            runScenario();
+        });
+
+        function showThought(htmlText, isGlitch = false, showButton = false) {
+            return new Promise(resolve => {
+                const bubble = document.getElementById('thought-bubble');
+                if (isGlitch) {
+                    bubble.classList.add('glitch-thought');
+                } else {
+                    bubble.classList.remove('glitch-thought');
+                }
+                
+                let content = `<div class="bubble-text">${htmlText}</div>`;
+                if (showButton) {
+                    content += `<button class="btn-continue-thought" id="btn-continue-thought">Continuer ❯</button>`;
+                }
+                bubble.innerHTML = content;
+                
+                bubble.classList.remove('hidden');
+                void bubble.offsetWidth;
+                bubble.classList.add('visible');
+                
+                if (showButton) {
+                    const btn = document.getElementById('btn-continue-thought');
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        resolve();
+                    });
+                } else {
+                    setTimeout(resolve, 400); 
+                }
+            });
+        }
+
+        function hideThought() {
+            return new Promise(resolve => {
+                const bubble = document.getElementById('thought-bubble');
+                bubble.classList.remove('visible');
+                setTimeout(() => {
+                    bubble.classList.add('hidden');
+                    resolve();
+                }, 400);
+            });
+        }
+
+        function showChoices(choicesHTML) {
+            return new Promise(resolve => {
+                const container = document.getElementById('choices-container');
+                container.innerHTML = choicesHTML;
+                container.classList.remove('hidden');
+                void container.offsetWidth;
+                container.classList.add('visible');
+                setTimeout(resolve, 400);
+            });
+        }
+
+        function hideChoices() {
+            return new Promise(resolve => {
+                const container = document.getElementById('choices-container');
+                container.classList.remove('visible');
+                setTimeout(() => {
+                    container.classList.add('hidden');
+                    resolve();
+                }, 400);
+            });
+        }
+
+        async function typeMessage(text, isSent = false) {
+            const list = document.getElementById('msg-list');
+            
+            // Pre-message spacing / typing indicator
+            let typing = null;
+            if (!isSent) {
+                typing = document.createElement('div');
+                typing.className = 'msg typing';
+                typing.innerText = 'Ami 1 est en train d\'écrire...';
+                list.appendChild(typing);
+                list.scrollTop = list.scrollHeight;
+                await wait(1800);
+                typing.remove();
+            }
+
+            const msg = document.createElement('div');
+            msg.className = `msg ${isSent ? 'sent' : 'received'}`;
+            list.appendChild(msg);
+
+            let currentText = "";
+            const chars = text.split("");
+            for (let char of chars) {
+                currentText += char;
+                msg.innerText = currentText;
+                list.scrollTop = list.scrollHeight;
+                audio.playClick();
+                await wait(isSent ? 20 : 45); // fast for self-typing
+            }
+            await wait(300);
+        }
+
+        async function typeInInput(text) {
+            const input = document.getElementById('chat-input');
+            const btn = document.getElementById('chat-send-btn');
+            
+            input.value = "";
+            btn.classList.add('active-btn');
+
+            const chars = text.split("");
+            for (let char of chars) {
+                input.value += char;
+                audio.playClick();
+                await wait(60); // automatic typing pace
+            }
+            await wait(450);
+            
+            // Trigger auto send with entry animation
+            const list = document.getElementById('msg-list');
+            const msg = document.createElement('div');
+            msg.className = 'msg sent';
+            msg.innerText = input.value;
+            list.appendChild(msg);
+            
+            // Force reflow to ensure entry animation runs
+            void msg.offsetWidth;
+            list.scrollTop = list.scrollHeight;
+            
+            input.value = "";
+            btn.classList.remove('active-btn');
+            audio.playClick();
+        }
+
+        async function runPropagandaCascade() {
+            // Fades hum volume momentarily to create a slight suspenseful pause
+            audio.setHumGain(0.02, 0.5);
+            await wait(1200);
+
+            const phone = document.getElementById('phone');
+            const screen = document.getElementById('screen');
+            const glow = document.getElementById('ambient-glow');
+            const redLines = document.getElementById('scanline-red');
+            const notifArea = document.getElementById('notif-area');
+
+            // 8 precise French adaptations of the user's requested notifications, order-preserved
+            const propagandaList = [
+                { 
+                    header: "📊 Dataland Opinion · Recommandé", 
+                    text: "95% de la population soutient les décisions du président.", 
+                    lvl: 0,
+                    bpm: 56,
+                    delay: 2400
+                },
+                { 
+                    header: "⚠️ Dataland Alerte · Sécurité", 
+                    text: "Des groupes terroristes menacent les frontières de Dataland.", 
+                    lvl: 2,
+                    bpm: 68,
+                    delay: 2000
+                },
+                { 
+                    header: "📈 Dataland Progrès · Économie", 
+                    text: "Le président Elias a réduit le chômage de 32%.", 
+                    lvl: 0,
+                    bpm: 74,
+                    delay: 1800
+                },
+                { 
+                    header: "🌐 Dataland Hebdo · Finance", 
+                    text: "La croissance économique se maintient malgré les tensions internationales.", 
+                    lvl: 1,
+                    bpm: 80,
+                    delay: 1400
+                },
+                { 
+                    header: "🔥 Dataland Décide · Opinion", 
+                    text: "La neutralité fait le jeu de l'ennemi.", 
+                    lvl: 3,
+                    bpm: 88,
+                    delay: 1100
+                },
+                { 
+                    header: "🛡️ Vigilance Numérique · Alerte", 
+                    text: "Les opposants propagent de dangereuses fausses informations.", 
+                    lvl: 3,
+                    bpm: 96,
+                    delay: 800
+                },
+                { 
+                    header: "⚖️ Ordre Public · Communiqué", 
+                    text: "La sécurité doit primer sur le confort individuel.", 
+                    lvl: 4,
+                    bpm: 104,
+                    delay: 600
+                },
+                { 
+                    header: "🚨 ALERTE MAXIMALE · Tribune", 
+                    text: "Dataland doit agir avant qu'il ne soit trop tard.", 
+                    lvl: 4,
+                    bpm: 112,
+                    delay: 2200
+                }
+            ];
+
+            const screenHeight = screen.clientHeight || 720;
+            
+            // Start calm heartbeat & atmospheric hum
+            audio.playHeartbeat(55);
+            audio.setHumFrequency(55, 1);
+            audio.setHumGain(0.06, 1);
+
+            for (let i = 0; i < propagandaList.length; i++) {
+                const info = propagandaList[i];
+                
+                // Create dynamic notification element
+                const notif = document.createElement('div');
+                notif.className = `ios-notification propaganda-notif notif-level-${info.lvl}`;
+                notif.id = `prop-notif-${i}`;
+                
+                // Dynamic spacing so notifications fit perfectly within screenHeight and are fully readable
+                const calculatedTop = 45 + (i * 74); 
+                const topPos = Math.min(calculatedTop, screenHeight - 95);
+                notif.style.top = `${topPos}px`;
+                notif.style.zIndex = 200 + i;
+
+                // Speed up slide-down animation progressively
+                const animDuration = Math.max(0.18, 0.5 - (i * 0.05));
+                notif.style.animationDuration = `${animDuration}s`;
+
+                notif.innerHTML = `
+                    <div class="ios-notification-header">${info.header}</div>
+                    <div class="ios-notification-body">${info.text}</div>
+                `;
+
+                notifArea.appendChild(notif);
+
+                // Sound chimes follow visual levels: blue is a soft chime, red/crimson is aggressive & detuned
+                if (info.lvl <= 1) {
+                    audio.playNotification(false);
+                } else {
+                    audio.playNotification(true, i * 12);
+                    audio.playGlitch();
+                }
+
+                // Progressive visual escalation inside the phone mockup
+                if (i === 1) {
+                    // First alert triggers red atmospheric glow and soft vignette
+                    glow.classList.add('manipulated');
+                    redLines.classList.add('active');
+                } else if (i === 4) {
+                    // Ideological pressure triggers subtle crimson corner outline
+                    phone.classList.add('glitch-phone');
+                    audio.setHumFrequency(48, 1.5);
+                    audio.setHumGain(0.09, 1.5);
+                } else if (i === 6) {
+                    // Critical alarm level triggers minor warmth filter & device vibration
+                    screen.classList.add('glitch-screen');
+                    audio.setHumFrequency(42, 2);
+                    audio.setHumGain(0.13, 2);
+                    if (navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100]);
+                    }
+                }
+
+                // Heartbeat accelerates progressively with notification cascade
+                audio.setHeartbeatBpm(info.bpm);
+
+                // Delay between notifications decays (speeding up!)
+                await wait(info.delay);
+            }
+
+            await wait(1800);
+        }
+
+        function updateLockClock() {
+            const clockEl = document.querySelector('.lock-clock');
+            const dateEl = document.querySelector('.lock-date');
+            if (!clockEl || !dateEl) return;
+            
+            const now = new Date();
+            const pad = (n) => n < 10 ? '0' + n : n;
+            clockEl.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+            
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            const dateStr = now.toLocaleDateString('fr-FR', options);
+            // Capitalize first letter of weekday and month
+            dateEl.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+        }
+
+        async function runScenario() {
+            // Initialize and dynamically update lock clock
+            updateLockClock();
+            const clockInterval = setInterval(updateLockClock, 30000);
+
+            // Wait 1.5 seconds idle on lockscreen
+            await wait(1500);
+
+            // --- NOTIFICATION BANNER SLIDES IN PREVIEW ---
+            const lockNotif = document.getElementById('lock-notif');
+            lockNotif.classList.add('visible');
+            audio.playNotification(false);
+
+            // Wait for user interaction
+            await new Promise(resolve => {
+                lockNotif.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    resolve();
+                });
+            });
+
+            // Clean up clock updates
+            clearInterval(clockInterval);
+
+            // --- ANIMATE APP OPENING ---
+            audio.playUnlock();
+            
+            const lockScreen = document.getElementById('lock-screen');
+            const appScreen = document.getElementById('app-screen');
+            
+            lockScreen.style.opacity = '0';
+            lockScreen.style.transform = 'scale(1.08)';
+            lockScreen.style.pointerEvents = 'none';
+            
+            appScreen.style.opacity = '1';
+            appScreen.style.transform = 'scale(1)';
+            appScreen.style.pointerEvents = 'auto';
+
+            await wait(700);
+            lockScreen.classList.add('hidden'); // Clear DOM layer
+
+            // --- CONVERSATION POPULATION (INSTANT) ---
+            const msgList = document.getElementById('msg-list');
+            const msg = document.createElement('div');
+            msg.className = 'msg received';
+            msg.innerText = "Yo… t'as vu le discours du président de Dataland ?\nJ'ai l'impression qu'on sera bientôt en guerre...\nt'en penses quoi ?";
+            msgList.appendChild(msg);
+            
+            // Force reflow and scroll
+            void msg.offsetWidth;
+            msgList.scrollTop = msgList.scrollHeight;
+
+            await wait(1200);
+
+            // --- INTERNAL THOUGHT BUBBLE ---
+            // Wait for Continuer button click
+            await showThought(`Hmm… je n'ai pas vraiment suivi ça…`, false, true);
+            await hideThought();
+            await wait(500);
+
+            // --- PLAYER CHOICES PANEL ---
+            const choicesHTML = `
+                <button class="choice-btn" id="btn-choice-a">CHOIX A (PATRIOTIQUE) : "Vive Dataland !! Pour la guerre !!"</button>
+                <button class="choice-btn" id="btn-choice-b">CHOIX B (PACIFISTE) : "Je ne suis pas sûr… je n'aime pas la violence…"</button>
+            `;
+            await showChoices(choicesHTML);
+
+            // Conditional execution
+            let chosen = await new Promise(resolve => {
+                document.getElementById('btn-choice-a').addEventListener('click', () => resolve('a'));
+                document.getElementById('btn-choice-b').addEventListener('click', () => resolve('b'));
+            });
+
+            await hideChoices();
+            await wait(400);
+
+            if (chosen === 'a') {
+                // --- OPTION 1 FLOW — PATRIOTIC / INFLUENCE PATH ---
+                audio.playClick();
+                
+                // glow red choice button intensely simulation
+                document.getElementById('ambient-glow').style.background = 'radial-gradient(circle, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0) 70%)';
+                await wait(200);
+
+                // instant message send (as if expectantly supported by AI)
+                const fastMsg = document.createElement('div');
+                fastMsg.className = 'msg sent';
+                fastMsg.innerText = "Je sais pas mais vive la nation !!! Pour la guerre !!! 🇩🇱";
+                msgList.appendChild(fastMsg);
+                // Force reflow for animation
+                void fastMsg.offsetWidth;
+                msgList.scrollTop = msgList.scrollHeight;
+                audio.playClick();
+                
+                await wait(1000);
+
+            } else {
+                // --- OPTION 2 FLOW — PACIFIST / INFLUENCE PATH ---
+                audio.playClick();
+
+                // Send message normally
+                await typeMessage("Je ne suis pas vraiment sûr… je n'aime pas la violence…", true);
+            }
+
+            // Both options lead to the same algorithmic manipulation sequence
+            await runPropagandaCascade();
+
+            // --- THOUGHT MANIPULATION ---
+            // Shows thought bubble rewriting itself
+            await showThought(`Hmm… je n'ai pas vraiment suivi ça…`, false, false);
+            await wait(1800);
+
+            const bubble = document.getElementById('thought-bubble');
+            bubble.classList.add('glitch-thought');
+            audio.playGlitch();
+
+            let bubbleTextEl = bubble.querySelector('.bubble-text');
+            if (!bubbleTextEl) {
+                bubble.innerHTML = '<div class="bubble-text"></div>';
+                bubbleTextEl = bubble.querySelector('.bubble-text');
+            }
+
+            const targetThought = "Hmm… c'est vrai que ce n'est peut-être pas si mal pour nous finalement…";
+            let tempText = "";
+            for (let char of targetThought.split("")) {
+                tempText += char;
+                bubbleTextEl.innerText = tempText;
+                audio.playClick();
+                await wait(50);
+            }
+            
+            // Append "Continuer ❯" button and wait for click
+            const btnContainer = document.createElement('div');
+            btnContainer.style.marginTop = '12px';
+            btnContainer.innerHTML = `<button class="btn-continue-thought" id="btn-continue-thought">Continuer ❯</button>`;
+            bubble.appendChild(btnContainer);
+            
+            await new Promise(resolve => {
+                document.getElementById('btn-continue-thought').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    resolve();
+                });
+            });
+
+            await hideThought();
+
+            // --- SUDDEN GLITCH & LOSS OF CONTROL ---
+            audio.playGlitch();
+            
+            // Severe visual glitch flash on screen and phone border
+            screen.classList.add('glitch-screen');
+            phone.classList.add('glitch-phone');
+            
+            // Notifications disappear instantly as system overloads
+            notifArea.innerHTML = "";
+            
+            await wait(500);
+            
+            // Release severe visual glitch state
+            screen.classList.remove('glitch-screen');
+            phone.classList.remove('glitch-phone');
+            
+            // Send the message directly (instantly, bypassing physical typing input control)
+            const finalMsg = document.createElement('div');
+            finalMsg.className = 'msg sent';
+            finalMsg.innerText = "Je me suis renseigné un peu… j'aime bien ses idées maintenant, c'est peut-être pas mal pour nous.";
+            msgList.appendChild(finalMsg);
+            
+            // Force reflow and scroll to bottom
+            void finalMsg.offsetWidth;
+            msgList.scrollTop = msgList.scrollHeight;
+            audio.playClick();
+
+            await wait(2500);
+
+            // --- SUBTLE PSYCHOLOGICAL HORROR ENDING ---
+            // Instant notification dismissal & total silence
+            const notifArea = document.getElementById('notif-area');
+            notifArea.innerHTML = "";
+            const redLines = document.getElementById('scanline-red');
+            redLines.classList.remove('active');
+            audio.mute(); // Silence
+            audio.playGlitch();
+
+            // Smooth message app slide down/fade
+            const app = document.querySelector('.app-screen');
+            app.style.transition = 'opacity 1s ease, transform 1s ease';
+            app.style.opacity = '0.05';
+            app.style.transform = 'scale(0.95)';
+
+            await wait(2200); // 2 seconds of pure quiet calm
+
+            // Very small, clean default notification slides in on top
+            const finalNotif = document.createElement('div');
+            finalNotif.className = "ios-notification";
+            finalNotif.style.border = "1px solid rgba(255, 255, 255, 0.08)";
+            finalNotif.style.background = "rgba(10, 10, 15, 0.95)";
+            finalNotif.style.boxShadow = "0 8px 24px rgba(0,0,0,0.4)";
+            finalNotif.innerHTML = `
+                <div class="ios-notification-header" style="color: #94a3b8;">👁️ Dataland Réseau</div>
+                <div class="ios-notification-body" style="color: #cbd5e1;">5 nouveaux articles recommandés pour vous.</div>
+            `;
+            notifArea.appendChild(finalNotif);
+            audio.playNotification(false); // soft standard chime
+
+            await wait(4500);
+
+            // Black screen fadeout
+            const screen = document.getElementById('screen');
+            const blackOverlay = document.createElement('div');
+            blackOverlay.style.position = 'absolute';
+            blackOverlay.style.inset = '0';
+            blackOverlay.style.background = '#000';
+            blackOverlay.style.opacity = '0';
+            blackOverlay.style.transition = 'opacity 2.2s ease';
+            blackOverlay.style.zIndex = '999';
+            screen.appendChild(blackOverlay);
+            
+            void blackOverlay.offsetWidth;
+            blackOverlay.style.opacity = '1';
+            
+            await wait(2500);
+
+            document.getElementById('end-quote').innerText = "Ton fil d'actualité ne te montre pas le monde. Il te montre ce qu'il veut que tu croies.";
+            const end = document.getElementById('fade-end');
+            end.classList.add('active');
+        }
+
+        // Recommencer click handler for parent iframe navigation
+        document.getElementById('btn-recommencer').addEventListener('click', () => {
+            window.parent.postMessage({ action: 'nextScene' }, '*');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 150);
+        });
+
+        // Initialize clock immediately on DOM load to guarantee it is populated when phone emerges
+        window.addEventListener('DOMContentLoaded', () => {
+            updateLockClock();
+        });
+    </script>
+</body>
+</html>
